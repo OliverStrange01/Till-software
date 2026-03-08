@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.till.controller.MainController">
+    <top>
+        <Label text="Till POS System" style="-fx-font-size: 24; -fx-padding: 10;" alignment="CENTER"/>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.6">
+            <!-- Left: Products -->
+            <VBox spacing="10" style="-fx-padding: 10;">
+                <Label text="Products" style="-fx-font-weight: bold;"/>
+                <ListView fx:id="productListView" prefHeight="400"/>
+            </VBox>
+
+            <!-- Right: Cart -->
+            <VBox spacing="10" style="-fx-padding: 10;">
+                <Label text="Current Order" style="-fx-font-weight: bold;"/>
+                <TableView fx:id="cartTable" prefHeight="400">
+                    <columns>
+                        <TableColumn fx:id="nameCol" text="Item" prefWidth="200"/>
+                        <TableColumn fx:id="qtyCol" text="Qty" prefWidth="60"/>
+                        <TableColumn fx:id="priceCol" text="Price" prefWidth="100"/>
+                        <TableColumn fx:id="subtotalCol" text="Subtotal" prefWidth="100"/>
+                    </columns>
+                </TableView>
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Label fx:id="totalLabel" text="Total: £0.00" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+                </HBox>
+            </VBox>
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <Button fx:id="payButton" text="Pay Now" prefWidth="200" prefHeight="50" style="-fx-font-size: 16;"/>
+    </bottom>
+</BorderPane>

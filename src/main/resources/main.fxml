@@ -37,6 +37,19 @@
     </center>
 
     <bottom>
-        <Button fx:id="payButton" text="Pay Now" prefWidth="200" prefHeight="50" style="-fx-font-size: 16;"/>
+        <VBox spacing="10" style="-fx-padding: 10;">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Cash given:" />
+                <TextField fx:id="cashField" promptText="Enter cash amount" prefWidth="150" />
+                <Button fx:id="payButton"
+                        text="Pay by Cash"
+                        prefWidth="150"
+                        prefHeight="40"
+                        style="-fx-font-size: 16;"
+                        onAction="#handleCashPayment"/>
+            </HBox>
+
+            <Label fx:id="resultLabel" text="" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
+        </VBox>
     </bottom>
 </BorderPane>

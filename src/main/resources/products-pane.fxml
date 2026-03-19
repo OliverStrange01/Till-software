@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.till.controller.ProductCategoryController"
+      spacing="10" style="-fx-padding: 10;">
+
+    <Label text="Products / Quick Add" style="-fx-font-weight: bold;"/>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="Coffee $4.50" onAction="#addCoffee"/>
+        <Button text="Sandwich $7.00" onAction="#addSandwich"/>
+    </HBox>
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="Muffin $3.20" onAction="#addMuffin"/>
+        <Button text="Water $1.50" onAction="#addWater"/>
+    </HBox>
+
+</VBox>

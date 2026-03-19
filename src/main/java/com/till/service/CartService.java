@@ -1,50 +1,68 @@
 package com.till.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.till.model.OrderItems;
-import com.till.model.Products;
+import com.till.model.OrderItem;
+import com.till.model.Product;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class CartService {
 
-    private final List <OrderItems> items = new ArrayList<>();
+    private final ObservableList<OrderItem> cartItems = FXCollections.observableArrayList();
 
-    public void addProduct(Products product) {
-        for (OrderItems item : items) {
+    public ObservableList<OrderItem> getCartItems() {
+        return cartItems;
+    }
+
+    public void addItem(Product product) {
+        // Check if already in cart → increase quantity
+        for (OrderItem item : cartItems) {
             if (item.getProduct().getId().equals(product.getId())) {
                 item.increaseQuantity();
+                // Trigger UI update (ObservableList fires change event automatically)
                 return;
             }
         }
-        items.add(new OrderItems(product));
+        // New item
+        cartItems.add(new OrderItem(product));
     }
 
-    public List<OrderItems> getItems() {
-        return items;
+    public void removeItem(OrderItem item) {
+        cartItems.remove(item);
+    }
+
+    public void updateQuantity(OrderItem item, int newQty) {
+        if (newQty <= 0) {
+            removeItem(item);
+        } else {
+            item.setQuantity(newQty);  // make sure this method exists in OrderItem
+        }
+    }
+
+    public DoubleBinding totalBinding() {
+        return Bindings.createDoubleBinding(() ->
+                cartItems.stream()
+                        .mapToDouble(OrderItem::getSubtotal)
+                        .sum(),
+                cartItems);
     }
 
     public double getTotal() {
-        double total = 0;
-        
-        for (OrderItems item : items) {
-            total += item.getSubtotal();
-        }
-
-        return total;   
+        return cartItems.stream()
+                .mapToDouble(OrderItem::getSubtotal)
+                .sum();
     }
 
     public double calculateChange(double cashGiven) {
         double total = getTotal();
-        
         if (cashGiven < total) {
             return -1; // Not enough cash
         }
-
-        return cashGiven - total; // Change to return
+        return cashGiven - total;
     }
 
     public void clearCart() {
-        items.clear();
+        cartItems.clear();
     }
 }

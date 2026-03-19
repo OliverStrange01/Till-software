@@ -3,53 +3,56 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.control.SplitPane?>
 
-<BorderPane xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.till.controller.MainController">
+<BorderPane xmlns="http://javafx.com/javafx/23"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.till.controller.MainController"
+            fx:id="rootPane">
+
+    <!-- Top header -->
     <top>
-        <Label text="Till POS System" style="-fx-font-size: 24; -fx-padding: 10;" alignment="CENTER"/>
+        <VBox alignment="CENTER" style="-fx-background-color: #2c3e50; -fx-padding: 12;">
+            <Label text="Till POS System"
+                   style="-fx-text-fill: white; -fx-font-size: 22; -fx-font-weight: bold;"/>
+        </VBox>
     </top>
 
+    <!-- Main content: products | cart -->
     <center>
-        <SplitPane dividerPositions="0.6">
-            <!-- Left: Products -->
-            <VBox spacing="10" style="-fx-padding: 10;">
-                <Label text="Products" style="-fx-font-weight: bold;"/>
-                <ListView fx:id="productListView" prefHeight="400"/>
-            </VBox>
-
-            <!-- Right: Cart -->
-            <VBox spacing="10" style="-fx-padding: 10;">
-                <Label text="Current Order" style="-fx-font-weight: bold;"/>
-                <TableView fx:id="cartTable" prefHeight="400">
-                    <columns>
-                        <TableColumn fx:id="nameCol" text="Item" prefWidth="200"/>
-                        <TableColumn fx:id="qtyCol" text="Qty" prefWidth="60"/>
-                        <TableColumn fx:id="priceCol" text="Price" prefWidth="100"/>
-                        <TableColumn fx:id="subtotalCol" text="Subtotal" prefWidth="100"/>
-                    </columns>
-                </TableView>
-                <HBox spacing="10" alignment="CENTER_RIGHT">
-                    <Label fx:id="totalLabel" text="Total: £0.00" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
-                </HBox>
-            </VBox>
-        </SplitPane>
+        <SplitPane fx:id="splitPane" dividerPositions="0.55" orientation="HORIZONTAL" />
     </center>
 
+    <!-- Bottom: payment / status area -->
     <bottom>
-        <VBox spacing="10" style="-fx-padding: 10;">
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Cash given:" />
-                <TextField fx:id="cashField" promptText="Enter cash amount" prefWidth="150" />
+        <VBox spacing="10" style="-fx-padding: 12; -fx-background-color: #f5f5f5;">
+
+            <!-- Cash payment row -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="Cash given:" style="-fx-font-size: 16;" />
+                <TextField fx:id="cashField" 
+                           promptText="Enter amount" 
+                           prefWidth="180" 
+                           style="-fx-font-size: 16;" />
                 <Button fx:id="payButton"
                         text="Pay by Cash"
-                        prefWidth="150"
-                        prefHeight="40"
-                        style="-fx-font-size: 16;"
-                        onAction="#handleCashPayment"/>
+                        prefWidth="160"
+                        prefHeight="45"
+                        style="-fx-font-size: 16; -fx-background-color: #4CAF50; -fx-text-fill: white;"
+                        onAction="#handleCashPayment" />
             </HBox>
 
-            <Label fx:id="resultLabel" text="" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
+            <!-- Result / status -->
+            <Label fx:id="resultLabel" 
+                   text="" 
+                   style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #d32f2f;" />
+
+            <!-- Optional status line -->
+            <Label text="Ready" 
+                   style="-fx-font-style: italic; -fx-text-fill: #555;" 
+                   alignment="CENTER_RIGHT" 
+                   HBox.hgrow="ALWAYS" />
         </VBox>
     </bottom>
+
 </BorderPane>

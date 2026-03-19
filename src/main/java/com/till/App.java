@@ -27,9 +27,6 @@ public class App extends Application {
 
         FXMLLoader fxmlLoader = new FXMLLoader(url);
 
-        // Optional: set controller factory if needed later
-        // fxmlLoader.setControllerFactory(c -> new MainController());
-
         Scene scene = new Scene(fxmlLoader.load(), 1000, 700);
 
         stage.setTitle("Till POS System");

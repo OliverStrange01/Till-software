@@ -1,5 +1,6 @@
 # Till-software
 Point of sale software for Thematic project university module
 
-to run:
-mvn clean javafx:run
+to run (in terminal):
+mvn clean javafx:run 
+

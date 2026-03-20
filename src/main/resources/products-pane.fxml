@@ -5,17 +5,27 @@
 
 <VBox xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.till.controller.ProductCategoryController"
-      spacing="10" style="-fx-padding: 10;">
+      spacing="12" style="-fx-padding: 16;">
 
-    <Label text="Products / Quick Add" style="-fx-font-weight: bold;"/>
+    <Label text="Select Category" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
 
-    <HBox spacing="10" alignment="CENTER">
-        <Button text="Coffee $4.50" onAction="#addCoffee"/>
-        <Button text="Sandwich $7.00" onAction="#addSandwich"/>
+    <!-- Category tabs / buttons -->
+    <HBox fx:id="categoryBar" spacing="8" alignment="CENTER_LEFT" style="-fx-padding: 8 0;">
+        <!-- Buttons will be added dynamically in controller -->
     </HBox>
-    <HBox spacing="10" alignment="CENTER">
-        <Button text="Muffin $3.20" onAction="#addMuffin"/>
-        <Button text="Water $1.50" onAction="#addWater"/>
+
+
+
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label fx:id="categoryTitle" style="-fx-font-size: 20;" />
+        <Button fx:id="refreshButton"
+                text="↻"
+                onAction="#onRefresh"
+                prefWidth="40" prefHeight="40"
+                style="-fx-background-color: transparent; -fx-font-size: 18;" />
     </HBox>
+    <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS">
+        <FlowPane fx:id="productFlowPane" hgap="12" vgap="12" />
+    </ScrollPane>
 
 </VBox>

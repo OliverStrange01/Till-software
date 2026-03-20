@@ -19,7 +19,7 @@
     </TableView>
 
     <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Label fx:id="totalLabel" text="Total: $0.00" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+        <Label fx:id="totalLabel" text="Total: £0.00" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
         <Button fx:id="clearButton" text="Clear Cart" onAction="#clearCart"/>
     </HBox>
 

@@ -32,7 +32,7 @@ public class CartController implements Initializable {
         // Bind the table and total label now that we have the service
         cartTable.setItems(cartService.getCartItems());
         totalLabel.textProperty().bind(
-                Bindings.format("Total: $%.2f", cartService.totalBinding())
+                Bindings.format("Total: £%.2f", cartService.totalBinding())
         );
     }
 

@@ -20,9 +20,6 @@
 
     <HBox spacing="10" alignment="CENTER_RIGHT">
         <Label fx:id="totalLabel" text="Total: £0.00" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
-        <Button fx:id="clearButton" text="Clear Cart" onAction="#clearCart"/>
+        <Button fx:id="clearButton" text="Clear Basket" onAction="#clearCart"/>
     </HBox>
-
-    <Button fx:id="payButton" text="Pay Now" prefWidth="200" prefHeight="50"
-            style="-fx-font-size: 16;" onAction="#payNow"/>
 </VBox>

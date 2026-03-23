@@ -1,7 +1,6 @@
 package com.till.controller;
 
 import com.till.model.OrderItem;
-import com.till.model.Product;
 import com.till.service.CartService;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
@@ -21,7 +20,6 @@ public class CartController implements Initializable {
     @FXML private TableColumn<OrderItem, Double> priceCol;
     @FXML private TableColumn<OrderItem, Double> subtotalCol;
     @FXML private Label totalLabel;
-    @FXML private Button payButton;
     @FXML private Button clearButton;
 
     private CartService cartService;
@@ -29,7 +27,6 @@ public class CartController implements Initializable {
     public void setCartService(CartService service) {
         this.cartService = service;
 
-        // Bind the table and total label now that we have the service
         cartTable.setItems(cartService.getCartItems());
         totalLabel.textProperty().bind(
                 Bindings.format("Total: £%.2f", cartService.totalBinding())
@@ -42,30 +39,24 @@ public class CartController implements Initializable {
     }
 
     private void setupTableColumns() {
-        // Name column – use observable property from Product
         nameCol.setCellValueFactory(cellData ->
                 cellData.getValue().getProduct().nameProperty()
         );
 
-        // Quantity column – uses IntegerProperty
         qtyCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
 
-        // Price column – use observable property
         priceCol.setCellValueFactory(cellData ->
                 cellData.getValue().getProduct().priceProperty().asObject()
         );
 
-        // Subtotal column – dynamic, depends on quantity
         subtotalCol.setCellValueFactory(cellData ->
-                Bindings.createDoubleBinding(
-                        cellData.getValue()::getSubtotal,
-                        cellData.getValue().quantityProperty()
-                ).asObject()
+                cellData.getValue().subtotalProperty().asObject()
         );
 
         priceCol.setStyle("-fx-alignment: CENTER-RIGHT;");
         subtotalCol.setStyle("-fx-alignment: CENTER-RIGHT;");
 
+        // Remove column
         TableColumn<OrderItem, Void> removeCol = new TableColumn<>("Remove");
         removeCol.setCellFactory(new Callback<>() {
             @Override
@@ -91,8 +82,6 @@ public class CartController implements Initializable {
             }
         });
         removeCol.setPrefWidth(70);
-        removeCol.setMaxWidth(70);
-        removeCol.setMinWidth(70);
         cartTable.getColumns().add(removeCol);
     }
 
@@ -101,19 +90,5 @@ public class CartController implements Initializable {
         if (cartService != null) {
             cartService.clearCart();
         }
-    }
-
-    @FXML
-    private void payNow() {
-        if (cartService == null) {
-            new Alert(Alert.AlertType.WARNING, "Cart service not initialized").showAndWait();
-            return;
-        }
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Payment");
-        alert.setHeaderText("Total: " + totalLabel.getText());
-        alert.setContentText("Payment simulation – Accepted!\n(Implement real payment later)");
-        alert.showAndWait();
     }
 }

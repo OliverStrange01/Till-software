@@ -30,16 +30,20 @@
     <bottom>
         <VBox spacing="12" style="-fx-padding: 12; -fx-background-color: #f5f5f5;">
             <HBox spacing="15" alignment="CENTER_LEFT">
-                <Label text="Cash given:" style="-fx-font-size: 16;" />
-                <TextField fx:id="cashField" promptText="Enter amount" prefWidth="180" style="-fx-font-size: 16;" />
-                <Button fx:id="payButton" text="Pay by Cash" prefWidth="160" prefHeight="45"
-                        style="-fx-font-size: 16; -fx-background-color: #4CAF50; -fx-text-fill: white;"
-                        onAction="#handleCashPayment" />
+                <Label text="Cash given:" />
+                <TextField fx:id="cashField" promptText="Enter amount" prefWidth="180" />
 
-                <!-- New: Admin button -->
-                <Button fx:id="adminButton" text="Admin (Stock)" prefWidth="140" prefHeight="45"
-                        style="-fx-font-size: 16; -fx-background-color: #FF9800; -fx-text-fill: white;"
-                        onAction="#openAdminStock" />
+                <Button text="Pay with Cash" onAction="#handleCashPayment"
+                        prefWidth="160" prefHeight="45"
+                        style="-fx-background-color: #4CAF50; -fx-text-fill: white;" />
+
+                <Button text="Pay with Card" onAction="#handleCardPayment"
+                        prefWidth="160" prefHeight="45"
+                        style="-fx-background-color: #2196F3; -fx-text-fill: white;" />
+                <Button fx:id="adminButton" text="Admin (Stock)" onAction="#openAdminStock"/>
+
+                <Button text="Logout" onAction="#handleLogout" prefWidth="120" prefHeight="40"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
             </HBox>
 
             <Label fx:id="resultLabel" text="" style="-fx-font-size: 16; -fx-font-weight: bold;" />

@@ -2,10 +2,14 @@ package com.till.service;
 
 import com.till.model.OrderItem;
 import com.till.model.Product;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CartService {
 
@@ -16,16 +20,13 @@ public class CartService {
     }
 
     public void addItem(Product product) {
-        // Check if already in cart → increase quantity
         for (OrderItem item : cartItems) {
             if (item.getProduct().getId().equals(product.getId())) {
                 item.increaseQuantity();
-                // Trigger UI update (ObservableList fires change event automatically)
                 return;
             }
         }
-        // New item
-        cartItems.add(new OrderItem(product));
+        cartItems.add(new OrderItem(product));   // ← uses 1-arg constructor
     }
 
     public void removeItem(OrderItem item) {
@@ -41,11 +42,18 @@ public class CartService {
     }
 
     public DoubleBinding totalBinding() {
-        return Bindings.createDoubleBinding(() ->
-                cartItems.stream()
-                        .mapToDouble(OrderItem::getSubtotal)
-                        .sum(),
-                cartItems);
+        List<Observable> dependencies = new ArrayList<>();
+        dependencies.add(cartItems);  // list changes (add/remove)
+
+        // Add every item's subtotal as a dependency
+        for (OrderItem item : cartItems) {
+            dependencies.add(item.subtotalProperty());
+        }
+
+        return Bindings.createDoubleBinding(
+                () -> cartItems.stream().mapToDouble(OrderItem::getSubtotal).sum(),
+                dependencies.toArray(new Observable[0])
+        );
     }
 
     public double getTotal() {

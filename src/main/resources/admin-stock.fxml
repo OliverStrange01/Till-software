@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/23"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.till.controller.AdminStockController"
+      spacing="15"
+      style="-fx-padding: 20; -fx-background-color: #f5f5f5;">
+
+    <Label text="Manage Product Stock"
+           style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
+
+    <!-- Table of products -->
+    <TableView fx:id="stockTable"
+               prefHeight="400"
+               editable="true"
+               >
+
+        <columns>
+            <TableColumn fx:id="idCol"          text="ID"              prefWidth="90"   sortable="true"/>
+            <TableColumn fx:id="nameCol"        text="Product Name"    prefWidth="260"  sortable="true"/>
+            <TableColumn fx:id="priceCol"       text="Price £"         prefWidth="110"  sortable="true"/>
+            <TableColumn fx:id="currentStockCol" text="Current Stock"  prefWidth="130"  editable="false" sortable="true"/>
+            <TableColumn fx:id="addStockCol"    text="Add / Remove"    prefWidth="150"  editable="true"  sortable="false"/>
+        </columns>
+    </TableView>
+
+    <!-- Buttons -->
+    <HBox spacing="20" alignment="CENTER">
+        <Button text="Refresh List"
+                onAction="#refreshStock"
+                prefWidth="140" prefHeight="45"
+                style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+        <Button text="Save Changes"
+                onAction="#saveStockChanges"
+                prefWidth="140" prefHeight="45"
+                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+        <Button text="Close"
+                onAction="#closeWindow"
+                prefWidth="140" prefHeight="45"
+                style="-fx-background-color: #757575; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+        <!-- inside the bottom HBox or as new HBox -->
+        <Button text="New Product"
+                onAction="#addNewProduct"
+                prefWidth="140" prefHeight="45"
+                style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    </HBox>
+
+    <Label fx:id="statusLabel"
+           text="Ready — select a product and edit the 'Add / Remove' column"
+           style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #555555;
+                  -fx-padding: 8 0 0 0;"/>
+</VBox>

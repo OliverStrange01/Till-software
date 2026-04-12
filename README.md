@@ -113,32 +113,32 @@ This produces a `Till POS` folder containing `Till POS.exe`. The entire folder m
 ## Project Structure
 src/
 └── main/
-├── java/com/till/
-│   ├── App.java                  # JavaFX entry point
-│   ├── Launcher.java             # Fat JAR launcher wrapper
-│   ├── controller/               # FXML controllers
-│   │   ├── MainController.java
-│   │   ├── CartController.java
-│   │   ├── ProductCategoryController.java
-│   │   ├── AdminStockController.java
-│   │   └── LoginController.java
-│   ├── dao/                      # Database access
-│   │   ├── ProductDAO.java
-│   │   └── SalesDAO.java
-│   ├── database/
-│   │   └── DatabaseConnection.java
-│   ├── model/                    # Data models
-│   │   ├── Product.java
-│   │   ├── OrderItem.java
-│   │   └── SalesRecord.java
-│   └── service/
-│       └── CartService.java
-└── resources/                    # FXML layout files
-├── main-view.fxml
-├── cart-pane.fxml
-├── products-pane.fxml
-├── admin-stock.fxml
-└── login.fxml
+    ├── java/com/till/
+    │   ├── App.java                  # JavaFX entry point
+    │   ├── Launcher.java             # Fat JAR launcher wrapper
+    │   ├── controller/               # FXML controllers
+    │   │   ├── MainController.java
+    │   │   ├── CartController.java
+    │   │   ├── ProductCategoryController.java
+    │   │   ├── AdminStockController.java
+    │   │   └── LoginController.java
+    │   ├── dao/                      # Database access
+    │   │   ├── ProductDAO.java
+    │   │   └── SalesDAO.java
+    │   ├── database/
+    │   │   └── DatabaseConnection.java
+    │   ├── model/                    # Data models
+    │   │   ├── Product.java
+    │   │   ├── OrderItem.java
+    │   │   └── SalesRecord.java
+    │   └── service/
+    │       └── CartService.java
+    └── resources/                    # FXML layout files
+        ├── main-view.fxml
+        ├── cart-pane.fxml
+        ├── products-pane.fxml
+        ├── admin-stock.fxml
+        └── login.fxml
 
 ---
 

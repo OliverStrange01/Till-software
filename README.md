@@ -111,6 +111,7 @@ This produces a `Till POS` folder containing `Till POS.exe`. The entire folder m
 ---
 
 ## Project Structure
+```
 src/
 └── main/
     ├── java/com/till/
@@ -139,6 +140,7 @@ src/
         ├── products-pane.fxml
         ├── admin-stock.fxml
         └── login.fxml
+```
 
 ---
 

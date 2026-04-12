@@ -53,7 +53,7 @@ Right click the file in IntelliJ and select **Run 'App.main()'**.
 
 ## Default Login
 
-On first launch you will be presented with a login screen. Use amdin123, can be changed later if you'd like. Admin users have access to stock management and the end of day report.
+On first launch you will be presented with a login screen. Use admin123, can be changed later if you'd like. Admin users have access to stock management and the end of day report.
 
 ---
 

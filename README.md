@@ -44,10 +44,12 @@ mvn clean package
 
 ### 4. Run the application
 
-Run `App.java` located at:
-src/main/java/com/till/App.java
+In terminal 
 
-Right click the file in IntelliJ and select **Run 'App.main()'**.
+```bash
+mvn clean javafx:run
+```
+
 
 ---
 

@@ -1,49 +1,51 @@
 package com.till.controller;
 
+import com.till.dao.AuthDAO;
+import com.till.model.UserAccount;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-import javafx.stage.Modality;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class LoginController {
+    private static final Logger LOGGER = Logger.getLogger(LoginController.class.getName());
+    private final AuthDAO authDAO = new AuthDAO();
 
+    @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
     @FXML private Label errorLabel;
 
-    // Hardcoded manager password (SHA-256 hash of "admin123" for demo)
-    // Real app: use bcrypt + database
-    private static final String MANAGER_PASSWORD_HASH = "cbfdac6008f9cab4083784cbd1874f76618d2a97c879e8a1a0b2d8e2f7f5a0b8"; // SHA-256("admin123")
-
-    private static final String MANAGER_PASSWORD = "admin123"; // plain for demo - CHANGE THIS
-
     @FXML
-    private void handleLogin() {
-        String input = passwordField.getText().trim();
-
-        if (input.isEmpty()) {
-            errorLabel.setText("Password required");
-            return;
-        }
-
-        // Simple plain text check for demo (replace with hash check later)
-        if (input.equals(MANAGER_PASSWORD)) {
-            openMainApp(true); // true = admin mode
-        } else {
-            errorLabel.setText("Incorrect password");
-            passwordField.clear();
-        }
+    private void initialize() {
+        authDAO.ensureDefaultUsers();
     }
 
     @FXML
-    private void handleCashierLogin() {
-        openMainApp(false); // false = cashier mode
+    private void handleLogin() {
+        String username = usernameField.getText().trim();
+        String input = passwordField.getText().trim();
+
+        if (username.isEmpty() || input.isEmpty()) {
+            errorLabel.setText("Username and password are required");
+            return;
+        }
+
+        UserAccount account = authDAO.findByUsername(username);
+        if (account == null || !authDAO.verifyCredentials(username, input, null)) {
+            errorLabel.setText("Incorrect password");
+            passwordField.clear();
+            return;
+        }
+        boolean isAdmin = "MANAGER".equalsIgnoreCase(account.getRole());
+        openMainApp(isAdmin);
     }
 
     private void openMainApp(boolean isAdmin) {
@@ -65,8 +67,9 @@ public class LoginController {
             loginStage.close();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to load main application", e);
             new Alert(Alert.AlertType.ERROR, "Failed to load main application").showAndWait();
         }
     }
+
 }

@@ -1,7 +1,6 @@
 package com.till.model;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
 
 public class OrderItem {
@@ -58,8 +57,8 @@ public class OrderItem {
         }
     }
 
-    public DoubleBinding subtotalProperty() {
-        return getProduct().priceProperty().multiply(quantityProperty());
+    public DoubleProperty subtotalProperty() {
+        return subtotal;
     }
 
     public void decreaseQuantity() {

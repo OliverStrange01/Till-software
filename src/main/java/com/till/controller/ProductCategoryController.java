@@ -12,7 +12,9 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ProductCategoryController {
@@ -120,9 +122,6 @@ public class ProductCategoryController {
         btn.setOnAction(e -> {
             if (cartService != null && p.getStock() > 0) {
                 cartService.addItem(p);
-                System.out.println("Added to cart: " + p.getName());
-                // Optional: refresh view after adding (to update low-stock display)
-                // loadProducts();
             }
         });
 
@@ -142,7 +141,7 @@ public class ProductCategoryController {
 
 
 
-    // ─── Periodic background refresh ───
+    // Periodic background refresh.
     private void startAutoRefresh() {
         if (autoRefreshTimer != null) {
             autoRefreshTimer.stop();
@@ -162,8 +161,6 @@ public class ProductCategoryController {
     public void refreshView() {
         initializeCategories();
         loadProducts();
-        // Optional: light visual feedback
-        // categoryTitle.setText(categoryTitle.getText() + " • updated");
     }
 
     // Call this when closing the window / unloading the controller

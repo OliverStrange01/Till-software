@@ -6,8 +6,11 @@ import com.till.model.Product;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ProductDAO {
+    private static final Logger LOGGER = Logger.getLogger(ProductDAO.class.getName());
 
     public List<Product> getAllProducts() {
         List<Product> list = new ArrayList<>();
@@ -27,7 +30,7 @@ public class ProductDAO {
                 ));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Unable to load products", e);
         }
         return list;
     }
@@ -44,7 +47,7 @@ public class ProductDAO {
                 categories.add(rs.getString("category"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Unable to load categories", e);
         }
         return categories;
     }
@@ -68,7 +71,7 @@ public class ProductDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Unable to fetch product by id: " + id, e);
         }
         return null;
     }
@@ -84,7 +87,7 @@ public class ProductDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Unable to update stock for product: " + productId, e);
         }
     }
 }

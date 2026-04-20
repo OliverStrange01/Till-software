@@ -8,8 +8,11 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SalesDAO {
+    private static final Logger LOGGER = Logger.getLogger(SalesDAO.class.getName());
 
     public void logTransaction(List<OrderItem> items, double total, String paymentMethod) {
         String insertOrder = """
@@ -33,8 +36,12 @@ public class SalesDAO {
                 orderStmt.setString(4, paymentMethod);
                 orderStmt.executeUpdate();
 
-                ResultSet keys = orderStmt.getGeneratedKeys();
-                orderId = keys.next() ? keys.getLong(1) : -1;
+                try (ResultSet keys = orderStmt.getGeneratedKeys()) {
+                    orderId = keys.next() ? keys.getLong(1) : -1;
+                }
+                if (orderId < 0) {
+                    throw new SQLException("Failed to generate order id");
+                }
             }
 
             try (PreparedStatement itemStmt = conn.prepareStatement(insertItem)) {
@@ -52,7 +59,7 @@ public class SalesDAO {
 
             conn.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to log transaction", e);
         }
     }
 
@@ -81,7 +88,7 @@ public class SalesDAO {
                 ));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Unable to build today's sales breakdown", e);
         }
         return records;
     }
@@ -94,7 +101,7 @@ public class SalesDAO {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) return rs.getDouble(1);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Unable to fetch today's total", e);
         }
         return 0;
     }
@@ -107,7 +114,7 @@ public class SalesDAO {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) return rs.getInt(1);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Unable to fetch today's transaction count", e);
         }
         return 0;
     }

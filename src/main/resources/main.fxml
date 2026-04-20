@@ -32,6 +32,10 @@
             <HBox spacing="15" alignment="CENTER_LEFT">
                 <Label text="Cash given:" />
                 <TextField fx:id="cashField" promptText="Enter amount" prefWidth="180" />
+                <Label text="Coupon:" />
+                <TextField fx:id="couponField" promptText="e.g. WELCOME10" prefWidth="130" />
+                <Button text="Apply Coupon" onAction="#handleApplyCoupon"
+                        style="-fx-background-color: #8e44ad; -fx-text-fill: white;" />
 
                 <Button text="Pay with Cash" onAction="#handleCashPayment"
                         prefWidth="160" prefHeight="45"
@@ -43,6 +47,8 @@
                 <Button fx:id="endOfDayButton" text="End of Day" onAction="#handleEndOfDay"
                         style="-fx-background-color: #37474f; -fx-text-fill: white;"/>
                 <Button fx:id="adminButton" text="Admin (Stock)" onAction="#openAdminStock"/>
+                <Button fx:id="auditButton" text="Audit / Queue" onAction="#openAuditQueue"
+                        style="-fx-background-color: #6a1b9a; -fx-text-fill: white;"/>
 
                 <Button text="Logout" onAction="#handleLogout" prefWidth="120" prefHeight="40"
                         style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>

@@ -1,11 +1,29 @@
 package com.till.controller;
 
+import com.till.config.AppConfig;
+import com.till.dao.AuditDAO;
 import com.till.dao.ProductDAO;
-import com.till.dao.SalesDAO;          // ← add this import
+import com.till.dao.SalesDAO;
+import com.till.dao.TransactionSyncDAO;
+import com.till.model.AssistanceCall;
+import com.till.model.AssistanceType;
+import com.till.model.Coupon;
+import com.till.model.DiscountApplicationResult;
 import com.till.model.OrderItem;
 import com.till.model.Product;
-import com.till.model.SalesRecord;     // ← add this import
+import com.till.model.QueuedTransaction;
+import com.till.model.ReceiptData;
+import com.till.model.SalesRecord;
+import com.till.model.TransactionPayload;
+import com.till.service.AssistanceService;
 import com.till.service.CartService;
+import com.till.service.DiscountService;
+import com.till.service.ReceiptService;
+import com.till.service.TransactionApiClient;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,24 +42,39 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
-
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Paragraph;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MainController implements Initializable {
+    private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
 
     @FXML private SplitPane splitPane;
     @FXML private TextField cashField;
+    @FXML private TextField couponField;
     @FXML private Label resultLabel;
     @FXML private Button adminButton;
     @FXML private Button endOfDayButton;
+    @FXML private Button auditButton;
 
     private final CartService cartService = new CartService();
     private final ProductDAO productDAO = new ProductDAO();
-    private final SalesDAO salesDAO = new SalesDAO();   // ← add this
+    private final SalesDAO salesDAO = new SalesDAO();
+    private final AuditDAO auditDAO = new AuditDAO();
+    private final TransactionSyncDAO transactionSyncDAO = new TransactionSyncDAO();
+    private final DiscountService discountService = new DiscountService();
+    private final AssistanceService assistanceService = new AssistanceService();
+    private final ReceiptService receiptService = new ReceiptService();
+    private final TransactionApiClient transactionApiClient = new TransactionApiClient(
+            AppConfig.transactionApiUrl(),
+            AppConfig.transactionApiKey()
+    );
+
+    // Keep active discount state in-memory for the current basket only.
+    private Coupon appliedCoupon;
+    private double appliedDiscountAmount;
+    private boolean adminMode;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -49,11 +82,15 @@ public class MainController implements Initializable {
         loadCartPane();
         adminButton.setVisible(false);
         endOfDayButton.setVisible(false);
+        auditButton.setVisible(false);
+        processPendingSyncQueue();
     }
 
     public void setAdminMode(boolean isAdmin) {
+        this.adminMode = isAdmin;
         adminButton.setVisible(isAdmin);
         endOfDayButton.setVisible(isAdmin);
+        auditButton.setVisible(isAdmin);
     }
 
     private void loadProductsPane() {
@@ -64,7 +101,7 @@ public class MainController implements Initializable {
             controller.setCartService(cartService);
             splitPane.getItems().add(productsPane);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to load products pane", e);
         }
     }
 
@@ -78,7 +115,7 @@ public class MainController implements Initializable {
 
             Platform.runLater(() -> splitPane.setDividerPositions(0.60));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to load cart pane", e);
         }
     }
 
@@ -101,7 +138,7 @@ public class MainController implements Initializable {
                 loginStage.setResizable(false);
                 loginStage.show();
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Failed to open login screen", e);
             }
         }
     }
@@ -113,19 +150,19 @@ public class MainController implements Initializable {
             resultLabel.setStyle("-fx-text-fill: orange;");
             return;
         }
-        if (!validateStock()) return;  // ← add this
+        if (!validateStock()) return;
 
         try {
             double cashGiven = Double.parseDouble(cashField.getText().trim());
-            double total = cartService.getTotal();
+            double total = calculateFinalTotal();
             double change = total > 0 ? cashGiven - total : 0;
 
             if (cashGiven < total) {
-                resultLabel.setText("Not enough cash. Total is £" + String.format("%.2f", total));
+                resultLabel.setText("Not enough cash. Total is £" + String.format(Locale.UK, "%.2f", total));
                 resultLabel.setStyle("-fx-text-fill: #d32f2f;");
                 return;
             }
-            processSuccessfulPayment(total, cashGiven, change, true);
+            processSuccessfulPayment(total, cashGiven, change, "CASH");
         } catch (NumberFormatException e) {
             resultLabel.setText("Please enter a valid amount.");
             resultLabel.setStyle("-fx-text-fill: #d32f2f;");
@@ -139,9 +176,9 @@ public class MainController implements Initializable {
             resultLabel.setStyle("-fx-text-fill: orange;");
             return;
         }
-        if (!validateStock()) return;  // ← add this
+        if (!validateStock()) return;
 
-        double total = cartService.getTotal();
+        double total = calculateFinalTotal();
 
         if (Math.random() < 0.1) {
             resultLabel.setText("Card declined – Try again or use cash");
@@ -149,29 +186,75 @@ public class MainController implements Initializable {
             return;
         }
 
-        processSuccessfulPayment(total, total, 0, false);
+        processSuccessfulPayment(total, total, 0, "CARD");
     }
 
-    private void processSuccessfulPayment(double total, double tendered, double change, boolean isCash) {
+    @FXML
+    private void handleApplyCoupon() {
+        if (cartService.getCartItems().isEmpty()) {
+            resultLabel.setText("Add items to the basket before applying a coupon.");
+            resultLabel.setStyle("-fx-text-fill: #d32f2f;");
+            return;
+        }
+        double subTotal = cartService.getTotal();
+        DiscountApplicationResult result = discountService.applyCoupon(couponField.getText(), subTotal, appliedCoupon);
+        if (!result.isSuccess()) {
+            resultLabel.setText(result.getMessage());
+            resultLabel.setStyle("-fx-text-fill: #d32f2f;");
+            auditDAO.logEvent("COUPON_REJECTED", result.getMessage(), adminMode ? "ADMIN" : "CASHIER");
+            return;
+        }
+
+        appliedCoupon = result.getCoupon();
+        appliedDiscountAmount = result.getDiscountAmount();
+        resultLabel.setText(result.getMessage() + " | New total: £" + String.format(Locale.UK, "%.2f", result.getFinalTotal()));
+        resultLabel.setStyle("-fx-text-fill: #2e7d32;");
+        auditDAO.logEvent("COUPON_APPLIED", result.getMessage(), adminMode ? "ADMIN" : "CASHIER");
+    }
+
+    private void processSuccessfulPayment(double total, double tendered, double change, String paymentMethod) {
+        if (!checkAssistanceCalls(total)) {
+            return;
+        }
+
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Payment Accepted");
-        alert.setHeaderText(isCash ? "Paid with Cash" : "Paid with Card");
+        alert.setHeaderText("CASH".equals(paymentMethod) ? "Paid with Cash" : "Paid with Card");
         alert.setContentText(
-                "Total: £" + String.format("%.2f", total) + "\n" +
-                        (isCash ? "Cash Given: £" + String.format("%.2f", tendered) + "\nChange: £" + String.format("%.2f", change) : "No change required") + "\n\n" +
+                "Total: £" + String.format(Locale.UK, "%.2f", total) + "\n" +
+                        ("CASH".equals(paymentMethod) ? "Cash Given: £" + String.format(Locale.UK, "%.2f", tendered) + "\nChange: £" + String.format(Locale.UK, "%.2f", change) : "No change required") + "\n\n" +
                         "Thank you!"
         );
         alert.showAndWait();
 
-        generatePdfReceipt(total, tendered, change, isCash);   // PDF before clear
-        reduceStock();                                          // stock before clear
-        salesDAO.logTransaction(                               // ← fixed: instance call
+        generatePdfReceipt(total, tendered, change, paymentMethod);
+        reduceStock();
+        salesDAO.logTransaction(
                 new ArrayList<>(cartService.getCartItems()),
                 total,
-                isCash ? "CASH" : "CARD"
+                paymentMethod
+        );
+        TransactionPayload payload = new TransactionPayload(
+                new ArrayList<>(cartService.getCartItems()),
+                cartService.getTotal(),
+                appliedDiscountAmount,
+                total,
+                paymentMethod,
+                appliedCoupon == null ? null : appliedCoupon.getCode()
+        );
+        syncTransactionPayload(payload);
+        auditDAO.logEvent(
+                "PAYMENT_COMPLETED",
+                "Method=" + paymentMethod + ", total=" + String.format(Locale.UK, "%.2f", total),
+                adminMode ? "ADMIN" : "CASHIER"
         );
 
-        cartService.clearCart();                               // clear last
+        cartService.clearCart();
+        appliedCoupon = null;
+        appliedDiscountAmount = 0;
+        if (couponField != null) {
+            couponField.clear();
+        }
         cashField.clear();
         resultLabel.setText("Payment completed");
         resultLabel.setStyle("-fx-text-fill: green;");
@@ -198,45 +281,61 @@ public class MainController implements Initializable {
         }
     }
 
-    private void generatePdfReceipt(double total, double tendered, double change, boolean isCash) {
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
-        String filePath = "receipts/receipt_" + timestamp + ".pdf";
-
+    private void generatePdfReceipt(double total, double tendered, double change, String paymentMethod) {
         try {
-            new File("receipts").mkdirs();
-
-            PdfWriter writer = new PdfWriter(filePath);
-            PdfDocument pdf = new PdfDocument(writer);
-            Document document = new Document(pdf);
-
-            document.add(new Paragraph("Till POS Receipt").setBold().setFontSize(18));
-            document.add(new Paragraph("Date: " + LocalDateTime.now()));
-            document.add(new Paragraph("----------------------------------------"));
-
-            for (OrderItem item : cartService.getCartItems()) {
-                document.add(new Paragraph(
-                        String.format("%-25s %3d x £%.2f = £%.2f",
-                                item.getProduct().getName(), item.getQuantity(),
-                                item.getProduct().getPrice(), item.getSubtotal())
-                ));
-            }
-
-            document.add(new Paragraph("----------------------------------------"));
-            document.add(new Paragraph(String.format("Total: £%.2f", total)));
-            if (isCash) {
-                document.add(new Paragraph(String.format("Cash: £%.2f", tendered)));
-                document.add(new Paragraph(String.format("Change: £%.2f", change)));
-            } else {
-                document.add(new Paragraph("Paid by Card"));
-            }
-            document.add(new Paragraph("Thank you!"));
-
-            document.close();
+            String filePath = receiptService.generateReceiptPdf(new ReceiptData(
+                    new ArrayList<>(cartService.getCartItems()),
+                    cartService.getTotal(),
+                    appliedDiscountAmount,
+                    total,
+                    tendered,
+                    change,
+                    paymentMethod,
+                    appliedCoupon == null ? null : appliedCoupon.getCode(),
+                    LocalDateTime.now()
+            ));
             Runtime.getRuntime().exec("cmd /c start " + filePath);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Failed to create or open PDF receipt", e);
             new Alert(Alert.AlertType.ERROR, "Failed to create PDF receipt").showAndWait();
         }
+    }
+
+    private double calculateFinalTotal() {
+        return Math.max(0, cartService.getTotal() - appliedDiscountAmount);
+    }
+
+    private boolean checkAssistanceCalls(double finalTotal) {
+        // Assistance checks are deliberately centralised here so every payment path
+        // (cash or card) applies the same operational safeguards.
+        List<AssistanceCall> calls = assistanceService.evaluateAssistanceNeeds(
+                new ArrayList<>(cartService.getCartItems()),
+                finalTotal,
+                appliedCoupon != null
+        );
+        if (calls.isEmpty()) {
+            return true;
+        }
+
+        StringBuilder message = new StringBuilder("Staff assistance needed:\n\n");
+        for (AssistanceCall call : calls) {
+            message.append("• ").append(call.getType()).append(": ").append(call.getReason()).append("\n");
+            auditDAO.logEvent("ASSISTANCE_CALL", call.getType() + ": " + call.getReason(), adminMode ? "ADMIN" : "CASHIER");
+        }
+
+        boolean managerOverrideRequested = calls.stream().anyMatch(c -> c.getType() == AssistanceType.MANAGER_OVERRIDE);
+        if (managerOverrideRequested && !adminMode) {
+            resultLabel.setText("Manager override required before payment can continue.");
+            resultLabel.setStyle("-fx-text-fill: #d32f2f;");
+            new Alert(Alert.AlertType.WARNING, message.toString()).showAndWait();
+            return false;
+        }
+
+        Alert review = new Alert(Alert.AlertType.CONFIRMATION);
+        review.setTitle("Assistance Check");
+        review.setHeaderText("Please confirm assistance checks");
+        review.setContentText(message + "\nContinue with payment?");
+        return review.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
     }
 
     @FXML
@@ -260,7 +359,7 @@ public class MainController implements Initializable {
 
         Alert done = new Alert(Alert.AlertType.INFORMATION);
         done.setTitle("End of Day Complete");
-        done.setContentText("Report generated. Total sales today: £" + String.format("%.2f", total));
+        done.setContentText("Report generated. Total sales today: £" + String.format(Locale.UK, "%.2f", total));
         done.showAndWait();
     }
 
@@ -283,7 +382,7 @@ public class MainController implements Initializable {
             document.add(new Paragraph("Product Breakdown:").setBold());
             for (SalesRecord record : breakdown) {
                 document.add(new Paragraph(
-                        String.format("%-25s %3d sold   £%.2f",
+                        String.format(Locale.UK, "%-25s %3d sold   £%.2f",
                                 record.getProductName(),
                                 record.getQuantitySold(),
                                 record.getRevenue())
@@ -291,13 +390,12 @@ public class MainController implements Initializable {
             }
 
             document.add(new Paragraph("----------------------------------------"));
-            document.add(new Paragraph(String.format("Total Revenue: £%.2f", total)).setBold());
+            document.add(new Paragraph(String.format(Locale.UK, "Total Revenue: £%.2f", total)).setBold());
             document.close();
 
             Runtime.getRuntime().exec("cmd /c start " + filePath);
-            System.out.println("End of day report saved: " + filePath);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Failed to generate end of day report", e);
             new Alert(Alert.AlertType.ERROR, "Failed to generate end of day report").showAndWait();
         }
     }
@@ -315,8 +413,49 @@ public class MainController implements Initializable {
             adminStage.initModality(Modality.APPLICATION_MODAL);
             adminStage.showAndWait();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Failed to open admin stock window", e);
             new Alert(Alert.AlertType.ERROR, "Failed to open admin panel").showAndWait();
+        }
+    }
+
+    @FXML
+    private void openAuditQueue() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/audit-queue.fxml"));
+            VBox pane = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Audit and Queue Monitor");
+            stage.setScene(new Scene(pane, 1000, 700));
+            stage.initOwner(splitPane.getScene().getWindow());
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Failed to open audit/queue monitor", e);
+            new Alert(Alert.AlertType.ERROR, "Failed to open audit/queue monitor").showAndWait();
+        }
+    }
+
+    private void syncTransactionPayload(TransactionPayload payload) {
+        String payloadJson = transactionApiClient.serialisePayload(payload);
+        boolean synced = transactionApiClient.submitJson(payloadJson);
+        if (!synced) {
+            transactionSyncDAO.enqueue(payloadJson);
+            auditDAO.logEvent("API_SYNC_QUEUED", "Transaction sync queued for retry", adminMode ? "ADMIN" : "CASHIER");
+            LOGGER.warning("Transaction API sync failed; queued for retry");
+        } else {
+            auditDAO.logEvent("API_SYNC_SUCCESS", "Transaction synced successfully", adminMode ? "ADMIN" : "CASHIER");
+        }
+    }
+
+    private void processPendingSyncQueue() {
+        List<QueuedTransaction> pending = transactionSyncDAO.getPending(AppConfig.transactionSyncBatchSize());
+        for (QueuedTransaction queuedTransaction : pending) {
+            boolean synced = transactionApiClient.submitJson(queuedTransaction.getPayloadJson());
+            if (synced) {
+                transactionSyncDAO.markSynced(queuedTransaction.getId());
+            } else {
+                transactionSyncDAO.markFailed(queuedTransaction.getId(), "Sync failed at startup retry");
+            }
         }
     }
 

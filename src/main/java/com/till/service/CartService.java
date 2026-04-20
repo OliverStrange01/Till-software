@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import java.util.Objects;
 
 public class CartService {
 
@@ -45,6 +46,7 @@ public class CartService {
     }
 
     public void addItem(Product product) {
+        Objects.requireNonNull(product, "Product cannot be null");
         for (OrderItem item : cartItems) {
             if (item.getProduct().getId().equals(product.getId())) {
                 item.increaseQuantity();

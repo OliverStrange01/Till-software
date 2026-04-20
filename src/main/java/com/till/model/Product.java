@@ -1,6 +1,7 @@
 package com.till.model;
 
 import javafx.beans.property.*;
+import java.util.Locale;
 
 public class Product {
 
@@ -64,6 +65,6 @@ public class Product {
 
     @Override
     public String toString() {
-        return getName() + " (£" + String.format("%.2f", getPrice()) + ", stock: " + getStock() + ")";
+        return getName() + " (£" + String.format(Locale.UK, "%.2f", getPrice()) + ", stock: " + getStock() + ")";
     }
 }

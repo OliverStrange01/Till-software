@@ -22,8 +22,11 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AdminStockController implements Initializable {
+    private static final Logger LOGGER = Logger.getLogger(AdminStockController.class.getName());
 
     @FXML private TableView<Product> stockTable;
     @FXML private TableColumn<Product, String> idCol;
@@ -103,17 +106,13 @@ public class AdminStockController implements Initializable {
 
     @FXML
     private void refreshStock() {
-        System.out.println("refreshStock() called");
-
         List<Product> loaded = productDAO.getAllProducts();
-        System.out.println("Loaded " + loaded.size() + " products from DAO");
 
         // Normalize categories of loaded products (cleans up old/inconsistent data)
         for (Product p : loaded) {
             String original = p.getCategory();
             String normalized = normalizeCategory(original);
             if (!normalized.equals(original)) {
-                System.out.println("Normalized category: " + original + " → " + normalized);
                 p.setCategory(normalized);
                 // Optional: update DB immediately (if you want permanent cleanup)
                 // productDAO.updateCategory(p.getId(), normalized); // you'd need to add this method
@@ -122,11 +121,6 @@ public class AdminStockController implements Initializable {
         }
 
         products.setAll(loaded);
-
-        for (Product p : products) {
-            System.out.println("Product: " + p.getName() + " | stock=" + p.getStock());
-            p.setStockToAdd(0);
-        }
 
         if (products.isEmpty()) {
             statusLabel.setText("No products found in database");
@@ -276,6 +270,7 @@ public class AdminStockController implements Initializable {
                 refreshStock();
                 statusLabel.setText("Added: " + product.getName() + " (" + product.getCategory() + ")");
             } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Unable to add new product", e);
                 showAlert("Failed to add product.\n" + e.getMessage());  // e.g. duplicate ID
             }
         });

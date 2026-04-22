@@ -1,5 +1,8 @@
 package com.till.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.till.model.Products;
 import com.till.service.CartService;
 
@@ -10,9 +13,13 @@ import javafx.scene.control.TextField;
 public class MainController {
 
     private final CartService cartService = new CartService();
+    private final List<Products> products = new ArrayList<>();
 
     @FXML
     private Label totalLabel;
+
+    @FXML
+    private TextField codeField;
 
     @FXML
     private TextField cashField;
@@ -21,17 +28,25 @@ public class MainController {
     private Label resultLabel;
 
     @FXML
-    public void initialize() {
-        // examples
-        cartService.addProduct(new Products("1", "Milk", 1.50));
-        cartService.addProduct(new Products("2", "Bread", 1.20));
-        cartService.addProduct(new Products("1", "Milk", 1.50));
+public void initialize() {
+    Products milk = new Products("1", "1001", "Milk", 1.50);
+    Products bread = new Products("2", "1002", "Bread", 1.20);
+    Products eggs = new Products("3", "1003", "Eggs", 2.00);
 
-        updateTotal();
-    }
+    products.add(milk);
+    products.add(bread);
+    products.add(eggs);
+
+    // examples
+    cartService.addProduct(milk);
+    cartService.addProduct(bread);
+    cartService.addProduct(milk);
+
+    updateTotal();
+}
 
     @FXML
-    private void handleCheckout() {
+    private void handleCashPayment() {
         try {
             double cashGiven = Double.parseDouble(cashField.getText());
             double total = cartService.getTotal();
@@ -49,6 +64,28 @@ public class MainController {
         } catch (NumberFormatException e) {
             resultLabel.setText("Please enter a valid amount of cash.");
         }
+    }
+
+    @FXML
+    private void handleAddByCode() {
+        String code = codeField.getText();
+
+        if (code == null || code.isBlank()) {
+            resultLabel.setText("Enter a product code.");
+            return;
+        }
+
+        Products foundProduct = cartService.findProductByCode(products, code);
+
+        if (foundProduct == null) {
+            resultLabel.setText("Product code not found.");
+            return;
+        }
+
+        cartService.addProduct(foundProduct);
+        updateTotal();
+        resultLabel.setText(foundProduct.getName() + " added.");
+        codeField.clear();
     }
 
     private void updateTotal() {

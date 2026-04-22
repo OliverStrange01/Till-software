@@ -2,11 +2,13 @@ package com.till.model;
 
 public class Products {
     private String id;
+    private String productCode;
     private String name;
     private double price;
 
-    public Products(String id, String name, double price) {
+    public Products(String id, String productCode, String name, double price) {
         this.id = id;
+        this.productCode = productCode;
         this.name = name;
         this.price = price;
     }
@@ -14,6 +16,7 @@ public class Products {
     // Getters + toString for display
     public String getId() { return id; }
     public String getName() { return name; }
+    public String getProductCode() { return productCode; }
     public double getPrice() { return price; }
 
     @Override

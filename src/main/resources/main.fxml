@@ -38,6 +38,13 @@
 
     <bottom>
         <VBox spacing="10" style="-fx-padding: 10;">
+            
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Product code:" />
+                <TextField fx:id="codeField" promptText="Enter code" prefWidth="150" />
+                <Button text="Add by Code" onAction="#handleAddByCode"/>
+            </HBox>
+            
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <Label text="Cash given:" />
                 <TextField fx:id="cashField" promptText="Enter cash amount" prefWidth="150" />

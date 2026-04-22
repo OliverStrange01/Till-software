@@ -20,6 +20,15 @@ public class CartService {
         items.add(new OrderItems(product));
     }
 
+    public Products findProductByCode(List<Products> products, String code) {
+        for (Products product : products) {
+            if (product.getProductCode().equalsIgnoreCase(code)) {
+                return product;
+            }
+        }
+        return null;
+    }
+
     public List<OrderItems> getItems() {
         return items;
     }

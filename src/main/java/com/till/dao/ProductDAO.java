@@ -14,20 +14,22 @@ public class ProductDAO {
 
     public List<Product> getAllProducts() {
         List<Product> list = new ArrayList<>();
-        String sql = "SELECT id, name, price, category, stock FROM products ORDER BY name";
+        String sql = "SELECT id, name, price, category, stock, barcode FROM products ORDER BY name";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                list.add(new Product(
+                Product p = new Product(
                         rs.getString("id"),
                         rs.getString("name"),
                         rs.getDouble("price"),
                         rs.getString("category"),
                         rs.getInt("stock")
-                ));
+                );
+                p.setBarcode(rs.getString("barcode") != null ? rs.getString("barcode") : "");
+                list.add(p);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "Unable to load products", e);
@@ -53,7 +55,7 @@ public class ProductDAO {
     }
 
     public Product getProductById(String id) {
-        String sql = "SELECT id, name, price, category, stock FROM products WHERE id = ?";
+        String sql = "SELECT id, name, price, category, stock, barcode FROM products WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -61,17 +63,45 @@ public class ProductDAO {
             ps.setString(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new Product(
+                    Product p = new Product(
                             rs.getString("id"),
                             rs.getString("name"),
                             rs.getDouble("price"),
                             rs.getString("category"),
                             rs.getInt("stock")
                     );
+                    p.setBarcode(rs.getString("barcode") != null ? rs.getString("barcode") : "");
+                    return p;
                 }
             }
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "Unable to fetch product by id: " + id, e);
+        }
+        return null;
+    }
+
+    public Product findByBarcode(String barcode) {
+        String sql = "SELECT id, name, price, category, stock, barcode FROM products WHERE barcode = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, barcode);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Product p = new Product(
+                            rs.getString("id"),
+                            rs.getString("name"),
+                            rs.getDouble("price"),
+                            rs.getString("category"),
+                            rs.getInt("stock")
+                    );
+                    p.setBarcode(rs.getString("barcode") != null ? rs.getString("barcode") : "");
+                    return p;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Unable to fetch product by barcode: " + barcode, e);
         }
         return null;
     }
@@ -88,6 +118,21 @@ public class ProductDAO {
 
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "Unable to update stock for product: " + productId, e);
+        }
+    }
+
+    public void updateBarcode(String productId, String barcode) {
+        String sql = "UPDATE products SET barcode = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, barcode);
+            ps.setString(2, productId);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Unable to update barcode for product: " + productId, e);
         }
     }
 }

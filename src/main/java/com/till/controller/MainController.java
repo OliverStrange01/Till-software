@@ -57,6 +57,7 @@ public class MainController implements Initializable {
     @FXML private Button adminButton;
     @FXML private Button endOfDayButton;
     @FXML private Button auditButton;
+    @FXML private TextField barcodeInput;
 
     private final CartService cartService = new CartService();
     private final ProductDAO productDAO = new ProductDAO();
@@ -167,6 +168,25 @@ public class MainController implements Initializable {
             resultLabel.setText("Please enter a valid amount.");
             resultLabel.setStyle("-fx-text-fill: #d32f2f;");
         }
+    }
+
+    @FXML
+    private void handleBarcodeInput() {
+        String barcode = barcodeInput.getText().trim();
+        if (barcode.isEmpty()) return;
+
+        Product found = productDAO.findByBarcode(barcode);
+        if (found == null) {
+            resultLabel.setText("No product found for barcode: " + barcode);
+            resultLabel.setStyle("-fx-text-fill: #d32f2f;");
+            barcodeInput.clear();
+            return;
+        }
+
+        cartService.addItem(found);
+        resultLabel.setText(found.getName() + " added to basket.");
+        resultLabel.setStyle("-fx-text-fill: #2e7d32;");
+        barcodeInput.clear();
     }
 
     @FXML

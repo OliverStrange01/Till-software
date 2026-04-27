@@ -32,10 +32,9 @@ public class AdminStockController implements Initializable {
     @FXML private TableColumn<Product, String> idCol;
     @FXML private TableColumn<Product, String> nameCol;
     @FXML private TableColumn<Product, Number> priceCol;
-
-    // Changed to Integer instead of Number → matches IntegerProperty & converter
     @FXML private TableColumn<Product, Integer> currentStockCol;
     @FXML private TableColumn<Product, Integer> addStockCol;
+    @FXML private TableColumn<Product, String> barcodeCol;
 
     @FXML private Label statusLabel;
 
@@ -66,16 +65,11 @@ public class AdminStockController implements Initializable {
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
 
-        // Current stock – read-only
         currentStockCol.setCellValueFactory(new PropertyValueFactory<>("stock"));
         currentStockCol.setEditable(false);
 
-        // Editable "Add Stock" column
         addStockCol.setCellValueFactory(new PropertyValueFactory<>("stockToAdd"));
-
-        // This now matches perfectly: Integer + IntegerStringConverter
         addStockCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
-
         addStockCol.setOnEditCommit(event -> {
             Product product = event.getRowValue();
             Integer newDelta = event.getNewValue();
@@ -96,7 +90,16 @@ public class AdminStockController implements Initializable {
                 statusLabel.setText("Change cleared for " + product.getName());
             }
 
-            stockTable.refresh(); // optional – usually not needed after single edit
+            stockTable.refresh();
+        });
+
+        barcodeCol.setCellValueFactory(new PropertyValueFactory<>("barcode"));
+        barcodeCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        barcodeCol.setOnEditCommit(event -> {
+            Product product = event.getRowValue();
+            product.setBarcode(event.getNewValue().trim());
+            productDAO.updateBarcode(product.getId(), product.getBarcode());
+            statusLabel.setText("Barcode updated for " + product.getName());
         });
 
         stockTable.setItems(products);
@@ -108,14 +111,11 @@ public class AdminStockController implements Initializable {
     private void refreshStock() {
         List<Product> loaded = productDAO.getAllProducts();
 
-        // Normalize categories of loaded products (cleans up old/inconsistent data)
         for (Product p : loaded) {
             String original = p.getCategory();
             String normalized = normalizeCategory(original);
             if (!normalized.equals(original)) {
                 p.setCategory(normalized);
-                // Optional: update DB immediately (if you want permanent cleanup)
-                // productDAO.updateCategory(p.getId(), normalized); // you'd need to add this method
             }
             p.setStockToAdd(0);
         }
@@ -143,7 +143,7 @@ public class AdminStockController implements Initializable {
             if (newStock < 0) {
                 statusLabel.setText("Blocked: " + product.getName() + " would go negative (" + newStock + ")");
                 blockedCount++;
-                product.setStockToAdd(0); // clear invalid change
+                product.setStockToAdd(0);
                 continue;
             }
 
@@ -175,56 +175,53 @@ public class AdminStockController implements Initializable {
         dialog.setTitle("Add New Product");
         dialog.setHeaderText("Enter product details");
 
-        // Create grid for inputs
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        // ID
         TextField idField = new TextField();
         idField.setPromptText("Unique ID (e.g. BANANA01)");
         grid.add(new Label("ID:"), 0, 0);
         grid.add(idField, 1, 0);
 
-        // Name
         TextField nameField = new TextField();
         nameField.setPromptText("Product name");
         grid.add(new Label("Name:"), 0, 1);
         grid.add(nameField, 1, 1);
 
-        // Price
         TextField priceField = new TextField("0.00");
         priceField.setPromptText("Price");
         grid.add(new Label("Price £:"), 0, 2);
         grid.add(priceField, 1, 2);
 
-        // Stock
         TextField stockField = new TextField("0");
         stockField.setPromptText("Initial stock");
         grid.add(new Label("Stock:"), 0, 3);
         grid.add(stockField, 1, 3);
 
-        // Category - ComboBox (editable so user can type new ones)
         ComboBox<String> categoryCombo = new ComboBox<>();
-        categoryCombo.setEditable(true);                   // ← key: allows typing new categories
+        categoryCombo.setEditable(true);
         categoryCombo.getItems().addAll(COMMON_CATEGORIES);
-        categoryCombo.setValue("Miscellaneous");           // default
+        categoryCombo.setValue("Miscellaneous");
         categoryCombo.setPromptText("Select or type category");
         grid.add(new Label("Category:"), 0, 4);
         grid.add(categoryCombo, 1, 4);
 
-        dialog.getDialogPane().setContent(grid);
+        TextField barcodeField = new TextField();
+        barcodeField.setPromptText("Barcode (optional)");
+        grid.add(new Label("Barcode:"), 0, 5);
+        grid.add(barcodeField, 1, 5);
 
-        // Buttons
+        dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        // Convert dialog result to Product (only on OK)
         dialog.setResultConverter(btn -> {
             if (btn == ButtonType.OK) {
                 try {
-                    String id    = idField.getText().trim();
-                    String name  = nameField.getText().trim();
+                    String id   = idField.getText().trim();
+                    String name = nameField.getText().trim();
+
                     double price;
                     try {
                         price = Double.parseDouble(priceField.getText().trim());
@@ -250,10 +247,10 @@ public class AdminStockController implements Initializable {
                         return null;
                     }
 
-                    // ─── Apply normalization here ───
                     String normalizedCat = normalizeCategory(rawCat);
-
-                    return new Product(id, name, price, normalizedCat, stock);
+                    Product product = new Product(id, name, price, normalizedCat, stock);
+                    product.setBarcode(barcodeField.getText().trim());
+                    return product;
 
                 } catch (Exception e) {
                     showAlert("Error creating product: " + e.getMessage());
@@ -270,18 +267,17 @@ public class AdminStockController implements Initializable {
                 refreshStock();
                 statusLabel.setText("Added: " + product.getName() + " (" + product.getCategory() + ")");
             } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, "Unable to add new product", e);
-                showAlert("Failed to add product.\n" + e.getMessage());  // e.g. duplicate ID
+                LOGGER.log(Level.WARNING, "Unable to add new product", e);
+                showAlert("Failed to add product.\n" + e.getMessage());
             }
         });
     }
 
     private void insertProduct(Product p) throws SQLException {
-        // Defensive: normalize again just before saving
         String finalCategory = normalizeCategory(p.getCategory());
-        p.setCategory(finalCategory);  // update the model object too
+        p.setCategory(finalCategory);
 
-        String sql = "INSERT INTO products (id, name, price, category, stock) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO products (id, name, price, category, stock, barcode) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -289,8 +285,9 @@ public class AdminStockController implements Initializable {
             ps.setString(1, p.getId());
             ps.setString(2, p.getName());
             ps.setDouble(3, p.getPrice());
-            ps.setString(4, finalCategory);   // use normalized version
+            ps.setString(4, finalCategory);
             ps.setInt(5, p.getStock());
+            ps.setString(6, p.getBarcode());
 
             int rows = ps.executeUpdate();
             if (rows == 0) {
@@ -301,15 +298,12 @@ public class AdminStockController implements Initializable {
 
     private String normalizeCategory(String category) {
         if (category == null || category.trim().isEmpty()) {
-            return "Miscellaneous"; // fallback
+            return "Miscellaneous";
         }
 
         String trimmed = category.trim();
-
-        // Collapse multiple spaces / tabs into single space
         trimmed = trimmed.replaceAll("\\s+", " ");
 
-        // Title Case: capitalize first letter of each word
         StringBuilder sb = new StringBuilder();
         boolean capitalizeNext = true;
 

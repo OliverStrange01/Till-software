@@ -12,22 +12,20 @@
     <Label text="Manage Product Stock"
            style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
 
-    <!-- Table of products -->
     <TableView fx:id="stockTable"
                prefHeight="400"
-               editable="true"
-               >
+               editable="true">
 
         <columns>
-            <TableColumn fx:id="idCol"          text="ID"              prefWidth="90"   sortable="true"/>
-            <TableColumn fx:id="nameCol"        text="Product Name"    prefWidth="260"  sortable="true"/>
-            <TableColumn fx:id="priceCol"       text="Price £"         prefWidth="110"  sortable="true"/>
-            <TableColumn fx:id="currentStockCol" text="Current Stock"  prefWidth="130"  editable="false" sortable="true"/>
-            <TableColumn fx:id="addStockCol"    text="Add / Remove"    prefWidth="150"  editable="true"  sortable="false"/>
+            <TableColumn fx:id="idCol"           text="ID"             prefWidth="90"  sortable="true"/>
+            <TableColumn fx:id="nameCol"         text="Product Name"   prefWidth="220" sortable="true"/>
+            <TableColumn fx:id="priceCol"        text="Price £"        prefWidth="90"  sortable="true"/>
+            <TableColumn fx:id="currentStockCol" text="Current Stock"  prefWidth="110" editable="false" sortable="true"/>
+            <TableColumn fx:id="addStockCol"     text="Add / Remove"   prefWidth="110" editable="true"  sortable="false"/>
+            <TableColumn fx:id="barcodeCol"      text="Barcode"        prefWidth="150" editable="true"  sortable="false"/>
         </columns>
     </TableView>
 
-    <!-- Buttons -->
     <HBox spacing="20" alignment="CENTER">
         <Button text="Refresh List"
                 onAction="#refreshStock"
@@ -44,7 +42,6 @@
                 prefWidth="140" prefHeight="45"
                 style="-fx-background-color: #757575; -fx-text-fill: white; -fx-font-weight: bold;"/>
 
-        <!-- inside the bottom HBox or as new HBox -->
         <Button text="New Product"
                 onAction="#addNewProduct"
                 prefWidth="140" prefHeight="45"

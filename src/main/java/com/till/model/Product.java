@@ -9,8 +9,8 @@ public class Product {
     private final StringProperty name     = new SimpleStringProperty();
     private final DoubleProperty price    = new SimpleDoubleProperty();
     private final StringProperty category = new SimpleStringProperty();
+    private final StringProperty barcode  = new SimpleStringProperty();
 
-    // Must be properties for TableView binding
     private final IntegerProperty stock      = new SimpleIntegerProperty(0);
     private final IntegerProperty stockToAdd = new SimpleIntegerProperty(0);
 
@@ -34,32 +34,37 @@ public class Product {
         setCategory(category != null ? category : "Uncategorized");
         setStock(stock);
         setStockToAdd(0);
+        setBarcode("");
     }
 
-    // Getters & Setters (classic style – keep them)
+    // Getters & Setters
     public String getId()          { return id.get(); }
     public void setId(String id)   { this.id.set(id); }
 
     public String getName()        { return name.get(); }
-    public void setName(String name) { this.name.set(name); }
+    public void setName(String n)  { this.name.set(n); }
 
     public double getPrice()       { return price.get(); }
-    public void setPrice(double price) { this.price.set(price); }
+    public void setPrice(double p) { this.price.set(p); }
 
     public String getCategory()    { return category.get(); }
-    public void setCategory(String category) { this.category.set(category); }
+    public void setCategory(String c) { this.category.set(c != null ? c : "Uncategorized"); }
+
+    public String getBarcode()             { return barcode.get(); }
+    public void setBarcode(String barcode) { this.barcode.set(barcode != null ? barcode : ""); }
 
     public int getStock()          { return stock.get(); }
-    public void setStock(int stock) { this.stock.set(stock); }
+    public void setStock(int s)    { this.stock.set(s); }
 
     public int getStockToAdd()     { return stockToAdd.get(); }
     public void setStockToAdd(int value) { this.stockToAdd.set(value); }
 
-    // Required: Property methods for PropertyValueFactory
+    // Property methods for TableView / PropertyValueFactory
     public StringProperty idProperty()          { return id; }
     public StringProperty nameProperty()        { return name; }
     public DoubleProperty priceProperty()       { return price; }
     public StringProperty categoryProperty()    { return category; }
+    public StringProperty barcodeProperty()     { return barcode; }
     public IntegerProperty stockProperty()      { return stock; }
     public IntegerProperty stockToAddProperty() { return stockToAdd; }
 

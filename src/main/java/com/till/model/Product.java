@@ -10,9 +10,12 @@ public class Product {
     private final DoubleProperty price    = new SimpleDoubleProperty();
     private final StringProperty category = new SimpleStringProperty();
     private final StringProperty barcode  = new SimpleStringProperty();
+    private final BooleanProperty weighted = new SimpleBooleanProperty(false);
+    private final StringProperty unit = new SimpleStringProperty("each");
 
     private final IntegerProperty stock      = new SimpleIntegerProperty(0);
     private final IntegerProperty stockToAdd = new SimpleIntegerProperty(0);
+    private final IntegerProperty lowStockThreshold = new SimpleIntegerProperty(10);
 
 
     public Product() {
@@ -53,11 +56,19 @@ public class Product {
     public String getBarcode()             { return barcode.get(); }
     public void setBarcode(String barcode) { this.barcode.set(barcode != null ? barcode : ""); }
 
+    public boolean isWeighted() { return weighted.get(); }
+    public void setWeighted(boolean value) { this.weighted.set(value); }
+
+    public String getUnit() { return unit.get(); }
+    public void setUnit(String value) { this.unit.set(value != null ? value : "each"); }
+
     public int getStock()          { return stock.get(); }
     public void setStock(int s)    { this.stock.set(s); }
 
     public int getStockToAdd()     { return stockToAdd.get(); }
     public void setStockToAdd(int value) { this.stockToAdd.set(value); }
+    public int getLowStockThreshold() { return lowStockThreshold.get();}
+    public void setLowStockThreshold(int value) { this.lowStockThreshold.set(value); }
 
     // Property methods for TableView / PropertyValueFactory
     public StringProperty idProperty()          { return id; }
@@ -65,8 +76,11 @@ public class Product {
     public DoubleProperty priceProperty()       { return price; }
     public StringProperty categoryProperty()    { return category; }
     public StringProperty barcodeProperty()     { return barcode; }
+    public BooleanProperty weightedProperty() { return weighted; }
+    public StringProperty unitProperty() { return unit; }
     public IntegerProperty stockProperty()      { return stock; }
     public IntegerProperty stockToAddProperty() { return stockToAdd; }
+    public IntegerProperty lowStockThresholdProperty() { return lowStockThreshold; }
 
     @Override
     public String toString() {

@@ -55,7 +55,10 @@ public class DatabaseConnection {
                 price REAL NOT NULL,
                 stock INTEGER DEFAULT 0,
                 category TEXT,
-                barcode TEXT
+                barcode TEXT,
+                low_stock_threshold INTEGER DEFAULT 10,
+                is_weighted INTEGER DEFAULT 0,
+                unit TEXT DEFAULT 'each'
             )
         """;
 
@@ -154,7 +157,10 @@ public class DatabaseConnection {
                 "ALTER TABLE orders ADD COLUMN payment_method TEXT DEFAULT 'CASH'",
                 "ALTER TABLE order_items ADD COLUMN product_name TEXT",
                 "ALTER TABLE order_items ADD COLUMN subtotal REAL",
-                "ALTER TABLE transaction_sync_queue ADD COLUMN next_attempt_at DATETIME DEFAULT CURRENT_TIMESTAMP"
+                "ALTER TABLE transaction_sync_queue ADD COLUMN next_attempt_at DATETIME DEFAULT CURRENT_TIMESTAMP",
+                "ALTER TABLE products ADD COLUMN low_stock_threshold INTEGER DEFAULT 10",
+                "ALTER TABLE products ADD COLUMN is_weighted INTEGER DEFAULT 0",
+                "ALTER TABLE products ADD COLUMN unit TEXT DEFAULT 'each'"
         };
 
         try (Statement stmt = connection.createStatement()) {

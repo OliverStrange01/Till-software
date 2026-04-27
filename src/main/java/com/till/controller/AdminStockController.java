@@ -128,6 +128,22 @@ public class AdminStockController implements Initializable {
             statusLabel.setText("Stock list refreshed (" + products.size() + " products loaded)");
         }
     }
+    @FXML
+    private void showLowStockOnly() {
+        List<Product> lowStock = productDAO.getLowStockProducts();
+
+        for (Product p : lowStock) {
+            p.setStockToAdd(0);
+        }
+
+        products.setAll(lowStock);
+
+        if (products.isEmpty()) {
+            statusLabel.setText("No low stock products found");
+        } else {
+            statusLabel.setText("Showing " + products.size() + " low stock product(s)");
+        }
+    }
 
     @FXML
     private void saveStockChanges() {
@@ -212,6 +228,15 @@ public class AdminStockController implements Initializable {
         barcodeField.setPromptText("Barcode (optional)");
         grid.add(new Label("Barcode:"), 0, 5);
         grid.add(barcodeField, 1, 5);
+        CheckBox weightedBox = new CheckBox("Sold by weight");
+        grid.add(new Label("Weighted:"), 0, 6);
+        grid.add(weightedBox, 1, 6);
+
+        ComboBox<String> unitCombo = new ComboBox<>();
+        unitCombo.getItems().addAll("each", "kg", "g");
+        unitCombo.setValue("each");
+        grid.add(new Label("Unit:"), 0, 7);
+        grid.add(unitCombo, 1, 7);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -250,6 +275,8 @@ public class AdminStockController implements Initializable {
                     String normalizedCat = normalizeCategory(rawCat);
                     Product product = new Product(id, name, price, normalizedCat, stock);
                     product.setBarcode(barcodeField.getText().trim());
+                    product.setWeighted(weightedBox.isSelected());
+                    product.setUnit(unitCombo.getValue());
                     return product;
 
                 } catch (Exception e) {
@@ -277,7 +304,7 @@ public class AdminStockController implements Initializable {
         String finalCategory = normalizeCategory(p.getCategory());
         p.setCategory(finalCategory);
 
-        String sql = "INSERT INTO products (id, name, price, category, stock, barcode) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO products (id, name, price, category, stock, barcode, is_weighted, unit) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -288,6 +315,8 @@ public class AdminStockController implements Initializable {
             ps.setString(4, finalCategory);
             ps.setInt(5, p.getStock());
             ps.setString(6, p.getBarcode());
+            ps.setInt(7, p.isWeighted() ? 1 : 0);
+            ps.setString(8, p.getUnit());
 
             int rows = ps.executeUpdate();
             if (rows == 0) {

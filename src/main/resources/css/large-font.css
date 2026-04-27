@@ -1,0 +1,28 @@
+/* Increase font size*/
+.root {
+    -fx-font-size: 16px;
+}
+
+.label {
+    -fx-font-size: 16px;
+}
+
+.button {
+    -fx-font-size: 16px;
+}
+
+.text-field {
+    -fx-font-size: 16px;
+}
+
+.table-view {
+    -fx-font-size: 15px;
+}
+
+.table-view .column-header .label {
+    -fx-font-size: 15px;
+}
+
+.check-box {
+    -fx-font-size: 16px;
+}

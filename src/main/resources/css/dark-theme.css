@@ -1,0 +1,56 @@
+/* Base colours*/
+.root {
+    -fx-base: #2b2b2b;
+    -fx-background: #2b2b2b;
+    -fx-control-inner-background: #3c3f41;
+    -fx-text-fill: #e0e0e0;
+    -fx-text-base-color: #e0e0e0;
+}
+
+.label {
+    -fx-text-fill: #e0e0e0 !important;
+}
+
+.bottom-bar {
+    -fx-background-color: #3c3f41;
+
+}
+
+.bottom-bar .label {
+    -fx-text-fill: #ffffff !important;
+}
+
+.text-field {
+    -fx-background-color: #3c3f41;
+    -fx-text-fill: #e0e0e0;
+    -fx-prompt-text-fill: #888888;
+    -fx-border-color: #555555;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.table-view {
+    -fx-background-color: #3c3f41;
+}
+
+.table-view .column-header {
+    -fx-background-color: #313335;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #e0e0e0 !important;
+}
+
+.table-row-cell {
+    -fx-background-color: #3c3f41;
+    -fx-text-fill: #e0e0e0;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #404346;
+}
+
+.scroll-pane,
+.scroll-pane .viewport {
+    -fx-background-color: #2b2b2b;
+}

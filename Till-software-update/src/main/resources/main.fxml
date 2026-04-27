@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.SplitPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/23"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.till.controller.MainController"
+            fx:id="rootPane">
+
+    <top>
+        <VBox alignment="CENTER" style="-fx-background-color: #2c3e50; -fx-padding: 12;">
+            <Label text="Till POS System"
+                   style="-fx-text-fill: white; -fx-font-size: 22; -fx-font-weight: bold;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <SplitPane fx:id="splitPane"
+                   dividerPositions="0.55"
+                   orientation="HORIZONTAL"
+                   VBox.vgrow="ALWAYS" />
+    </center>
+
+    <bottom>
+        <VBox spacing="12" style="-fx-padding: 12; -fx-background-color: #f5f5f5;">
+
+            <!-- Barcode scan row -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Barcode:" />
+                <TextField fx:id="barcodeInput"
+                           promptText="Scan or type barcode..."
+                           prefWidth="250"
+                           onAction="#handleBarcodeInput"/>
+                <Button text="Add Item"
+                        onAction="#handleBarcodeInput"
+                        prefWidth="100" prefHeight="35"
+                        style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            </HBox>
+
+            <!-- Payment row -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="Cash given:" />
+                <TextField fx:id="cashField" promptText="Enter amount" prefWidth="180" />
+                <Label text="Coupon:" />
+                <TextField fx:id="couponField" promptText="e.g. WELCOME10" prefWidth="130" />
+                <Button text="Apply Coupon" onAction="#handleApplyCoupon"
+                        style="-fx-background-color: #8e44ad; -fx-text-fill: white;" />
+                <Button text="Pay with Cash" onAction="#handleCashPayment"
+                        prefWidth="160" prefHeight="45"
+                        style="-fx-background-color: #4CAF50; -fx-text-fill: white;" />
+                <Button text="Pay with Card" onAction="#handleCardPayment"
+                        prefWidth="160" prefHeight="45"
+                        style="-fx-background-color: #2196F3; -fx-text-fill: white;" />
+                <Button fx:id="endOfDayButton" text="End of Day" onAction="#handleEndOfDay"
+                        style="-fx-background-color: #37474f; -fx-text-fill: white;"/>
+                <Button fx:id="adminButton" text="Admin (Stock)" onAction="#openAdminStock"/>
+                <Button fx:id="auditButton" text="Audit / Queue" onAction="#openAuditQueue"
+                        style="-fx-background-color: #6a1b9a; -fx-text-fill: white;"/>
+                <Button fx:id="analyticsButton" text="Analytics" onAction="#openAnalytics"
+                        style="-fx-background-color: #16a085; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button text="Logout" onAction="#handleLogout" prefWidth="120" prefHeight="40"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+            </HBox>
+
+            <Label fx:id="resultLabel" text="" style="-fx-font-size: 16; -fx-font-weight: bold;" />
+            <Label text="Ready" style="-fx-font-style: italic; -fx-text-fill: #555;" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS" />
+        </VBox>
+    </bottom>
+
+</BorderPane>

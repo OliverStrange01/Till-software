@@ -30,6 +30,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -50,13 +52,14 @@ import java.util.logging.Logger;
 public class MainController implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
 
-    @FXML private SplitPane splitPane;
+    @FXML private HBox mainContent;
     @FXML private TextField cashField;
     @FXML private TextField couponField;
     @FXML private Label resultLabel;
     @FXML private Button adminButton;
     @FXML private Button endOfDayButton;
     @FXML private Button auditButton;
+    @FXML private BorderPane rootPane;
 
     private final CartService cartService = new CartService();
     private final ProductDAO productDAO = new ProductDAO();
@@ -99,7 +102,7 @@ public class MainController implements Initializable {
             VBox productsPane = loader.load();
             ProductCategoryController controller = loader.getController();
             controller.setCartService(cartService);
-            splitPane.getItems().add(productsPane);
+            mainContent.getChildren().add(productsPane);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to load products pane", e);
         }
@@ -111,9 +114,8 @@ public class MainController implements Initializable {
             VBox cartPane = loader.load();
             CartController controller = loader.getController();
             controller.setCartService(cartService);
-            splitPane.getItems().add(cartPane);
+            mainContent.getChildren().add(cartPane);
 
-            Platform.runLater(() -> splitPane.setDividerPositions(0.60));
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to load cart pane", e);
         }
@@ -126,7 +128,7 @@ public class MainController implements Initializable {
         confirm.setHeaderText("Return to login?");
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             cartService.clearCart();
-            Stage current = (Stage) splitPane.getScene().getWindow();
+            Stage current = (Stage) rootPane.getScene().getWindow();
             current.close();
 
             try {
@@ -409,7 +411,7 @@ public class MainController implements Initializable {
             Stage adminStage = new Stage();
             adminStage.setTitle("Admin - Manage Stock");
             adminStage.setScene(new Scene(adminPane, 900, 600));
-            adminStage.initOwner(splitPane.getScene().getWindow());
+            adminStage.initOwner(rootPane.getScene().getWindow());
             adminStage.initModality(Modality.APPLICATION_MODAL);
             adminStage.showAndWait();
         } catch (IOException e) {
@@ -426,7 +428,7 @@ public class MainController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Audit and Queue Monitor");
             stage.setScene(new Scene(pane, 1000, 700));
-            stage.initOwner(splitPane.getScene().getWindow());
+            stage.initOwner(rootPane.getScene().getWindow());
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
         } catch (IOException e) {

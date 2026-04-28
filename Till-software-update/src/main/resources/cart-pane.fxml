@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.till.controller.CartController"
+      spacing="10" style="-fx-padding: 10;">
+
+    <Label text="Current Order" style="-fx-font-weight: bold; -fx-font-size: 16;"/>
+
+    <TableView fx:id="cartTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="nameCol"     text="Item"     prefWidth="200"/>
+            <TableColumn fx:id="qtyCol"      text="Qty"      prefWidth="60"/>
+            <TableColumn fx:id="priceCol"    text="Price"    prefWidth="100"/>
+            <TableColumn fx:id="subtotalCol" text="Subtotal" prefWidth="100"/>
+        </columns>
+    </TableView>
+
+    <!-- Action buttons row -->
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <Button text="+ Bag 30p"
+                onAction="#handleAddBag"
+                style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 4;"/>
+        <Button text="Split Bill"
+                onAction="#handleSplitBill"
+                style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 4;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="clearButton" text="Clear Basket"
+                onAction="#clearCart"
+                style="-fx-background-color: #e0e0e0; -fx-text-fill: #333; -fx-cursor: hand; -fx-background-radius: 4;"/>
+    </HBox>
+
+    <!-- Total -->
+    <HBox alignment="CENTER_RIGHT">
+        <Label fx:id="totalLabel" text="Total: £0.00"
+               style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+    </HBox>
+
+</VBox>

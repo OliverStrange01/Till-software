@@ -1,0 +1,101 @@
+Till POS System - Session Contribution Log
+Author: Jamie (implemented in this working session)
+
+Summary
+- Delivered the four requested POS feature areas: discounts/coupons, PDF receipts, transaction API sync, and assistance-call handling.
+- Performed broad refactor and hardening across controller, DAO, config, and database layers.
+- Added production-oriented auth, retry policy, audit visibility, and integration-style test coverage.
+
+1) Discounts and Coupons
+- Added discount domain models:
+  - src/main/java/com/till/model/DiscountType.java
+  - src/main/java/com/till/model/DiscountRule.java
+  - src/main/java/com/till/model/Coupon.java
+  - src/main/java/com/till/model/DiscountApplicationResult.java
+- Added discount service:
+  - src/main/java/com/till/service/DiscountService.java
+- Wired coupon UI and checkout behaviour:
+  - src/main/resources/main.fxml
+  - src/main/java/com/till/controller/MainController.java
+
+2) PDF Receipts
+- Added receipt model and service:
+  - src/main/java/com/till/model/ReceiptData.java
+  - src/main/java/com/till/service/ReceiptService.java
+- Integrated receipt generation into successful payment flow:
+  - src/main/java/com/till/controller/MainController.java
+
+3) Transactions API
+- Added transaction payload model and API client:
+  - src/main/java/com/till/model/TransactionPayload.java
+  - src/main/java/com/till/service/TransactionApiClient.java
+- Added queue-backed reliability for failed sync:
+  - src/main/java/com/till/model/QueuedTransaction.java
+  - src/main/java/com/till/dao/TransactionSyncDAO.java
+- Added startup retry processing and queue writes:
+  - src/main/java/com/till/controller/MainController.java
+
+4) Assistance Calls
+- Added assistance domain models and service:
+  - src/main/java/com/till/model/AssistanceType.java
+  - src/main/java/com/till/model/AssistanceCall.java
+  - src/main/java/com/till/service/AssistanceService.java
+- Integrated assistance checks into payment flow:
+  - src/main/java/com/till/controller/MainController.java
+
+5) Production-Grade Authentication
+- Added PBKDF2 password hashing utility:
+  - src/main/java/com/till/security/PasswordHasher.java
+- Added user model and DB auth DAO:
+  - src/main/java/com/till/model/UserAccount.java
+  - src/main/java/com/till/dao/AuthDAO.java
+- Added users table creation and default user seeding support:
+  - src/main/java/com/till/database/DatabaseConnection.java
+- Switched login from static password logic to username/password role auth:
+  - src/main/resources/login.fxml
+  - src/main/java/com/till/controller/LoginController.java
+
+6) Stronger Retry Policy
+- Added configurable backoff/retry settings:
+  - src/main/java/com/till/config/AppConfig.java
+- Added max-attempt dead-letter behaviour in queue state:
+  - src/main/java/com/till/dao/TransactionSyncDAO.java
+- Added legacy-schema compatibility fallback for existing local DBs.
+
+7) Audit Trail and Visibility
+- Added audit DAO and record model:
+  - src/main/java/com/till/dao/AuditDAO.java
+  - src/main/java/com/till/model/AuditEventRecord.java
+- Logged key events (coupon, assistance, payment, sync outcomes):
+  - src/main/java/com/till/controller/MainController.java
+- Added admin monitor screen for audit + queue visibility:
+  - src/main/java/com/till/controller/AuditQueueController.java
+  - src/main/resources/audit-queue.fxml
+  - src/main/resources/main.fxml
+
+8) Refactor and Code Quality Improvements
+- Improved controller/service separation and reduced checkout coupling.
+- Removed debug prints and cleaned unused imports in multiple classes.
+- Improved DAO logging and error handling patterns.
+- Updated DB initialisation and migration handling for new tables/columns.
+
+9) Tests Added/Expanded
+- src/test/java/com/till/service/DiscountServiceTest.java
+- src/test/java/com/till/service/AssistanceServiceTest.java
+- src/test/java/com/till/service/TransactionApiClientTest.java
+- src/test/java/com/till/service/AppConfigTest.java
+- src/test/java/com/till/dao/TransactionSyncDAOTest.java
+- src/test/java/com/till/dao/AuthDAOTest.java
+- src/test/java/com/till/dao/RetryPolicyIntegrationTest.java
+
+10) Build/Run and Documentation
+- Updated Maven setup for tests in pom.xml.
+- Updated README with:
+  - setup/run/test instructions
+  - environment variables
+  - feature list and project progress
+  - implementation summary and status notes
+
+Validation performed during session
+- Maven test suite executed successfully in local environment after updates.
+- Latest passing run reported: 12 tests, 0 failures, 0 errors.

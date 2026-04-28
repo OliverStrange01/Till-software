@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.till.controller.AnalyticsController"
+      spacing="15" style="-fx-padding: 20; -fx-background-color: #f0f2f5;">
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label text="Sales Analytics Dashboard"
+               style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="↻ Refresh" onAction="#handleRefresh"
+                style="-fx-background-color: #3498db; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 4;"/>
+    </HBox>
+
+    <!-- Summary cards -->
+    <HBox spacing="15">
+        <!-- Total Revenue -->
+        <VBox alignment="CENTER" spacing="5" prefWidth="180" prefHeight="90"
+              style="-fx-background-color: #27ae60; -fx-background-radius: 8; -fx-padding: 15;">
+            <Label text="Today's Revenue"
+                   style="-fx-text-fill: white; -fx-font-size: 13;"/>
+            <Label fx:id="totalRevenueLabel" text="£0.00"
+                   style="-fx-text-fill: white; -fx-font-size: 24; -fx-font-weight: bold;"/>
+        </VBox>
+
+        <!-- Total Transactions -->
+        <VBox alignment="CENTER" spacing="5" prefWidth="180" prefHeight="90"
+              style="-fx-background-color: #2980b9; -fx-background-radius: 8; -fx-padding: 15;">
+            <Label text="Transactions"
+                   style="-fx-text-fill: white; -fx-font-size: 13;"/>
+            <Label fx:id="totalTransactionsLabel" text="0"
+                   style="-fx-text-fill: white; -fx-font-size: 24; -fx-font-weight: bold;"/>
+        </VBox>
+
+        <!-- Top Product -->
+        <VBox alignment="CENTER" spacing="5" prefWidth="180" prefHeight="90"
+              style="-fx-background-color: #e67e22; -fx-background-radius: 8; -fx-padding: 15;">
+            <Label text="Top Product"
+                   style="-fx-text-fill: white; -fx-font-size: 13;"/>
+            <Label fx:id="topProductLabel" text="N/A"
+                   style="-fx-text-fill: white; -fx-font-size: 18; -fx-font-weight: bold;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Charts -->
+    <HBox spacing="15" VBox.vgrow="ALWAYS">
+        <!-- Bar chart -->
+        <BarChart fx:id="revenueChart" HBox.hgrow="ALWAYS"
+                  title="Revenue by Product">
+            <xAxis>
+                <CategoryAxis label="Product"/>
+            </xAxis>
+            <yAxis>
+                <NumberAxis label="Revenue (£)"/>
+            </yAxis>
+        </BarChart>
+
+        <!-- Pie chart -->
+        <PieChart fx:id="categoryPieChart" prefWidth="300"
+                  title="Revenue by Category"/>
+    </HBox>
+
+    <!-- Sales table -->
+    <Label text="Product Breakdown"
+           style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+    <TableView fx:id="salesTable" prefHeight="200">
+        <columns>
+            <TableColumn fx:id="productNameCol" text="Product"  prefWidth="250"/>
+            <TableColumn fx:id="qtySoldCol"     text="Qty Sold" prefWidth="100"/>
+            <TableColumn fx:id="revenueCol"     text="Revenue"  prefWidth="120"/>
+        </columns>
+    </TableView>
+
+</VBox>

@@ -32,6 +32,11 @@
                 prefWidth="140" prefHeight="45"
                 style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold;"/>
 
+        <Button text="View Low Stock"
+                onAction="#showLowStockOnly"
+                prefWidth="140" prefHeight="45"
+                style="-fx-background-color: #9C27B0; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
         <Button text="Save Changes"
                 onAction="#saveStockChanges"
                 prefWidth="140" prefHeight="45"

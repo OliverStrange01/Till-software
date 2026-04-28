@@ -14,7 +14,7 @@ public class ProductDAO {
 
     public List<Product> getAllProducts() {
         List<Product> list = new ArrayList<>();
-        String sql = "SELECT id, name, price, category, stock, barcode FROM products ORDER BY name";
+        String sql = "SELECT id, name, price, category, stock, barcode, low_stock_threshold, is_weighted, unit FROM products ORDER BY name";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -30,10 +30,41 @@ public class ProductDAO {
                 );
                 p.setBarcode(rs.getString("barcode") != null ? rs.getString("barcode") : "");
                 list.add(p);
+                p.setLowStockThreshold(rs.getInt("low_stock_threshold"));
+                p.setWeighted(rs.getInt("is_weighted") == 1);
+                p.setUnit(rs.getString("unit"));
             }
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "Unable to load products", e);
         }
+        return list;
+    }
+
+    public List<Product> getLowStockProducts() {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT id, name, price, category, stock, barcode, low_stock_threshold " +
+                "FROM products WHERE stock <= low_stock_threshold ORDER BY stock ASC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Product p = new Product(
+                        rs.getString("id"),
+                        rs.getString("name"),
+                        rs.getDouble("price"),
+                        rs.getString("category"),
+                        rs.getInt("stock")
+                );
+                p.setBarcode(rs.getString("barcode") != null ? rs.getString("barcode") : "");
+                p.setLowStockThreshold(rs.getInt("low_stock_threshold"));
+                list.add(p);
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Unable to load low stock products", e);
+        }
+
         return list;
     }
 
@@ -55,7 +86,7 @@ public class ProductDAO {
     }
 
     public Product getProductById(String id) {
-        String sql = "SELECT id, name, price, category, stock, barcode FROM products WHERE id = ?";
+        String sql = "SELECT id, name, price, category, stock, barcode, low_stock_threshold, is_weighted, unit FROM products WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -71,7 +102,11 @@ public class ProductDAO {
                             rs.getInt("stock")
                     );
                     p.setBarcode(rs.getString("barcode") != null ? rs.getString("barcode") : "");
+                    p.setLowStockThreshold(rs.getInt("low_stock_threshold"));
+                    p.setWeighted(rs.getInt("is_weighted") == 1);
+                    p.setUnit(rs.getString("unit"));
                     return p;
+
                 }
             }
         } catch (SQLException e) {
@@ -81,7 +116,7 @@ public class ProductDAO {
     }
 
     public Product findByBarcode(String barcode) {
-        String sql = "SELECT id, name, price, category, stock, barcode FROM products WHERE barcode = ?";
+        String sql = "SELECT id, name, price, category, stock, barcode, low_stock_threshold, is_weighted, unit FROM products WHERE barcode = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -97,6 +132,9 @@ public class ProductDAO {
                             rs.getInt("stock")
                     );
                     p.setBarcode(rs.getString("barcode") != null ? rs.getString("barcode") : "");
+                    p.setLowStockThreshold(rs.getInt("low_stock_threshold"));
+                    p.setWeighted(rs.getInt("is_weighted") == 1);
+                    p.setUnit(rs.getString("unit"));
                     return p;
                 }
             }

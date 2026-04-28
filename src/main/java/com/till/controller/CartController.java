@@ -15,7 +15,7 @@ public class CartController implements Initializable {
 
     @FXML private TableView<OrderItem> cartTable;
     @FXML private TableColumn<OrderItem, String> nameCol;
-    @FXML private TableColumn<OrderItem, Integer> qtyCol;
+    @FXML private TableColumn<OrderItem, Double> qtyCol;
     @FXML private TableColumn<OrderItem, Double> priceCol;
     @FXML private TableColumn<OrderItem, Double> subtotalCol;
     @FXML private Label totalLabel;
@@ -46,6 +46,28 @@ public class CartController implements Initializable {
         qtyCol.setCellValueFactory(cellData ->
                 cellData.getValue().quantityProperty().asObject()
         );
+
+        qtyCol.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double value, boolean empty) {
+                super.updateItem(value, empty);
+
+                if (empty || value == null) {
+                    setText(null);
+                    return;
+                }
+
+                OrderItem item = getTableView().getItems().get(getIndex());
+
+                if (item.getProduct().isWeighted()) {
+                    setText(String.format("%.2f %s", value, item.getProduct().getUnit()));
+                } else {
+                    setText(String.format("%.0f", value));
+                }
+            }
+        });
+
+
 
         priceCol.setCellValueFactory(cellData ->
                 cellData.getValue().getProduct().priceProperty().asObject()

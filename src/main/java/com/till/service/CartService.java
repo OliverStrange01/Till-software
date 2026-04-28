@@ -15,7 +15,7 @@ public class CartService {
     // The extractor tells JavaFX to also watch quantityProperty on each item.
     // Without this, the list only fires events for add/remove — not quantity changes.
     private final ObservableList<OrderItem> cartItems = FXCollections.observableArrayList(
-            item -> new Observable[]{ item.quantityProperty() }
+            item -> new Observable[]{ item.quantityProperty(), item.subtotalProperty() }
     );
 
     private final DoubleProperty total = new SimpleDoubleProperty(0);
@@ -46,14 +46,20 @@ public class CartService {
     }
 
     public void addItem(Product product) {
+        addItem(product, 1);
+    }
+
+    public void addItem(Product product, double quantity) {
         Objects.requireNonNull(product, "Product cannot be null");
+
         for (OrderItem item : cartItems) {
             if (item.getProduct().getId().equals(product.getId())) {
-                item.increaseQuantity();
+                item.increaseQuantity(quantity);
                 return;
             }
         }
-        cartItems.add(new OrderItem(product));
+
+        cartItems.add(new OrderItem(product, quantity));
     }
 
     public void removeItem(OrderItem item) {
@@ -68,7 +74,7 @@ public class CartService {
         }
     }
 
-    public void updateQuantity(OrderItem item, int newQty) {
+    public void updateQuantity(OrderItem item, double newQty) {
         if (newQty <= 0) {
             removeItem(item);
         } else {

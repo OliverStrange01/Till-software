@@ -6,13 +6,13 @@ import javafx.beans.property.*;
 public class OrderItem {
 
     private final Product product;
-    private final IntegerProperty quantity = new SimpleIntegerProperty(1);
+    private final DoubleProperty quantity = new SimpleDoubleProperty(1);
     private final DoubleProperty subtotal = new SimpleDoubleProperty();
 
     /**
      * Constructor with explicit quantity
      */
-    public OrderItem(Product product, int initialQty) {
+    public OrderItem(Product product, double initialQty) {
         if (product == null) {
             throw new IllegalArgumentException("Product cannot be null");
         }
@@ -35,15 +35,15 @@ public class OrderItem {
     // Quantity handling (with bounds checking)
     // ────────────────────────────────────────────────
 
-    public int getQuantity() {
+    public double getQuantity() {
         return quantity.get();
     }
 
-    public void setQuantity(int qty) {
-        quantity.set(Math.max(0, qty));     // never allow negative quantity
+    public void setQuantity(double qty) {
+        quantity.set(Math.max(0, qty));
     }
 
-    public IntegerProperty quantityProperty() {
+    public DoubleProperty quantityProperty() {
         return quantity;
     }
 
@@ -51,7 +51,7 @@ public class OrderItem {
         increaseQuantity(1);
     }
 
-    public void increaseQuantity(int amount) {
+    public void increaseQuantity(double amount) {
         if (amount > 0) {
             setQuantity(getQuantity() + amount);
         }
@@ -65,7 +65,7 @@ public class OrderItem {
         decreaseQuantity(1);
     }
 
-    public void decreaseQuantity(int amount) {
+    public void decreaseQuantity(double amount) {
         if (amount > 0) {
             setQuantity(getQuantity() - amount);
         }
@@ -89,7 +89,7 @@ public class OrderItem {
 
     @Override
     public String toString() {
-        return String.format("%s × %d = £%.2f",
-                product.getName(), getQuantity(), getSubtotal());
+        return String.format("%s × %.2f %s = £%.2f",
+                product.getName(), getQuantity(), product.getUnit(), getSubtotal());
     }
 }

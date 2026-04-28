@@ -295,7 +295,7 @@ public class MainController implements Initializable {
     private void reduceStock() {
         for (OrderItem item : cartService.getCartItems()) {
             Product p = item.getProduct();
-            int newStock = p.getStock() - item.getQuantity();
+            int newStock = p.getStock() - (int) Math.ceil(item.getQuantity());
             if (newStock < 0) newStock = 0;
             productDAO.updateStock(p.getId(), newStock);
         }

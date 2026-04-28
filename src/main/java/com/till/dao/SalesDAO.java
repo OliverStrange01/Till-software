@@ -49,7 +49,7 @@ public class SalesDAO {
                     itemStmt.setLong(1, orderId);
                     itemStmt.setString(2, item.getProduct().getId());
                     itemStmt.setString(3, item.getProduct().getName());
-                    itemStmt.setInt(4, item.getQuantity());
+                    itemStmt.setDouble(4, item.getQuantity());
                     itemStmt.setDouble(5, item.getProduct().getPrice());
                     itemStmt.setDouble(6, item.getSubtotal());
                     itemStmt.addBatch();

@@ -79,7 +79,7 @@ public class DatabaseConnection {
                 order_id INTEGER,
                 product_id TEXT,
                 product_name TEXT,
-                quantity INTEGER,
+                quantity REAL,
                 price REAL,
                 subtotal REAL,
                 FOREIGN KEY(order_id) REFERENCES orders(order_id),

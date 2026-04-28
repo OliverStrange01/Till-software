@@ -87,7 +87,6 @@ public class CartController implements Initializable {
             }
         });
 
-        // Actions column: [ - ] [ X ] [ ✎ ]
         TableColumn<OrderItem, Void> actionsCol = new TableColumn<>("Actions");
         actionsCol.setPrefWidth(120);
         actionsCol.setCellFactory(param -> new TableCell<>() {
@@ -127,7 +126,6 @@ public class CartController implements Initializable {
         cartTable.getColumns().add(actionsCol);
     }
 
-    // ── Edit Line / Special Instructions ─────────────────────────────────────
     private void showEditLineDialog(OrderItem item) {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Edit Line");
@@ -154,7 +152,6 @@ public class CartController implements Initializable {
 
         dialog.setResultConverter(btn -> {
             if (btn == ButtonType.OK) {
-                // Update quantity
                 int newQty = qtySpinner.getValue();
                 int diff = newQty - item.getQuantity();
                 if (diff > 0) {
@@ -162,7 +159,6 @@ public class CartController implements Initializable {
                 } else if (diff < 0) {
                     for (int i = 0; i < Math.abs(diff); i++) cartService.decrementItem(item);
                 }
-                // Save special instructions
                 item.setSpecialInstructions(noteField.getText().trim());
                 cartTable.refresh();
             }
@@ -172,7 +168,6 @@ public class CartController implements Initializable {
         dialog.showAndWait();
     }
 
-    // ── Split Bill ────────────────────────────────────────────────────────────
     @FXML
     private void handleSplitBill() {
         if (cartService == null || cartService.getCartItems().isEmpty()) {
@@ -189,19 +184,29 @@ public class CartController implements Initializable {
         peopleSpinner.setPrefWidth(80);
 
         Label resultLabel = new Label();
-        resultLabel.setStyle("-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+        resultLabel.setStyle("-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
         resultLabel.setWrapText(true);
 
         Button calcBtn = new Button("Calculate Split");
-        calcBtn.setStyle("-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
+        calcBtn.setStyle("-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold;");
         calcBtn.setMaxWidth(Double.MAX_VALUE);
 
         calcBtn.setOnAction(e -> {
             int people = peopleSpinner.getValue();
             double total = cartService.getTotal();
             double perPerson = total / people;
-            resultLabel.setText(String.format(
-                    "Total: £%.2f  ÷  %d people\n= £%.2f each", total, people, perPerson));
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(String.format("Total: £%.2f  ÷  %d people = £%.2f each%n%n",
+                    total, people, perPerson));
+            sb.append("Item breakdown per person:\n");
+            for (OrderItem item : cartService.getCartItems()) {
+                sb.append(String.format("  • %s (x%d): £%.2f each%n",
+                        item.getProduct().getName(),
+                        item.getQuantity(),
+                        item.getSubtotal() / people));
+            }
+            resultLabel.setText(sb.toString());
         });
 
         GridPane grid = new GridPane();
@@ -209,20 +214,19 @@ public class CartController implements Initializable {
         grid.setPadding(new Insets(15));
         grid.add(new Label("Number of people:"), 0, 0);
         grid.add(peopleSpinner, 1, 0);
-        grid.add(calcBtn,       0, 1, 2, 1);
-        grid.add(resultLabel,   0, 2, 2, 1);
+        grid.add(calcBtn, 0, 1, 2, 1);
+        grid.add(resultLabel, 0, 2, 2, 1);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        dialog.getDialogPane().setPrefWidth(380);
         dialog.showAndWait();
     }
 
-    // ── Add Bag ───────────────────────────────────────────────────────────────
     @FXML
     private void handleAddBag() {
         if (cartService == null) return;
 
-        // Check if bag already in cart
         for (OrderItem item : cartService.getCartItems()) {
             if (item.getProduct().getName().equals("Carrier Bag")) {
                 cartService.addItem(item.getProduct());
@@ -230,7 +234,6 @@ public class CartController implements Initializable {
             }
         }
 
-        // Create a temporary bag product
         Product bag = new Product();
         bag.setName("Carrier Bag");
         bag.setPrice(0.30);
@@ -239,7 +242,6 @@ public class CartController implements Initializable {
         cartService.addItem(bag);
     }
 
-    // ── Clear Cart ────────────────────────────────────────────────────────────
     @FXML
     private void clearCart() {
         if (cartService != null) {

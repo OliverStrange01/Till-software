@@ -1,0 +1,153 @@
+/* dark-mode.css — applied to every registered Scene when dark mode is on */
+
+.root {
+    -fx-base: #1e1e2e;
+    -fx-background: #1e1e2e;
+    -fx-control-inner-background: #2a2a3e;
+    -fx-control-inner-background-alt: #252535;
+    -fx-text-background-color: #e0e0e0;
+    -fx-text-fill: #e0e0e0;
+    -fx-accent: #5b9bd5;
+    -fx-focus-color: #5b9bd5;
+    -fx-faint-focus-color: rgba(91,155,213,0.2);
+}
+
+/* ── Generic controls ─────────────────────────────────────────────────── */
+.label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.text-field, .password-field, .text-area {
+    -fx-background-color: #2a2a3e;
+    -fx-text-fill: #e0e0e0;
+    -fx-prompt-text-fill: #888;
+    -fx-border-color: #444466;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.combo-box, .combo-box .list-cell {
+    -fx-background-color: #2a2a3e;
+    -fx-text-fill: #e0e0e0;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #2a2a3e;
+}
+
+.combo-box-popup .list-cell:filled:hover {
+    -fx-background-color: #3a3a5e;
+}
+
+/* ── TableView ────────────────────────────────────────────────────────── */
+.table-view {
+    -fx-background-color: #1e1e2e;
+    -fx-control-inner-background: #1e1e2e;
+    -fx-control-inner-background-alt: #252535;
+    -fx-table-cell-border-color: #333355;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #252535;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #c0c0d0;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: #1e1e2e;
+    -fx-text-fill: #e0e0e0;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #252535;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #3a4a6e;
+}
+
+.table-cell {
+    -fx-text-fill: #e0e0e0;
+}
+
+/* ── SplitPane & ScrollPane ───────────────────────────────────────────── */
+.split-pane {
+    -fx-background-color: #1e1e2e;
+    -fx-padding: 0;
+}
+
+.split-pane-divider {
+    -fx-background-color: #444466;
+    -fx-padding: 0 2 0 2;
+}
+
+.scroll-pane, .scroll-pane .viewport {
+    -fx-background-color: #1e1e2e;
+}
+
+/* ── Buttons — keep coloured action buttons readable in dark mode ─────── */
+.button {
+    -fx-background-color: #3a3a5e;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #555577;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.button:hover {
+    -fx-background-color: #4a4a7e;
+}
+
+/* Inline style overrides (coloured buttons) beat this — that's intentional */
+
+/* ── Dialogs ──────────────────────────────────────────────────────────── */
+.dialog-pane {
+    -fx-background-color: #1e1e2e;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #252535;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.dialog-pane .content.label {
+    -fx-text-fill: #e0e0e0;
+}
+
+/* ── VBox / HBox backgrounds used in the app ──────────────────────────── */
+VBox, HBox, BorderPane, GridPane, AnchorPane {
+    -fx-background-color: transparent;
+}
+
+/* Top header bar */
+.root > .border-pane > .top VBox {
+    -fx-background-color: #12122a;
+}
+
+/* Bottom toolbar */
+.root > .border-pane > .bottom VBox {
+    -fx-background-color: #18182a;
+}
+
+/* ── CheckBox ─────────────────────────────────────────────────────────── */
+.check-box .box {
+    -fx-background-color: #2a2a3e;
+    -fx-border-color: #555577;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: #5b9bd5;
+}
+
+/* ── Tooltip ──────────────────────────────────────────────────────────── */
+.tooltip {
+    -fx-background-color: #2a2a3e;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #555577;
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/23"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.till.controller.AuditQueueController"
+      spacing="12"
+      style="-fx-padding: 12;">
+
+    <Label text="Audit and Sync Queue Monitor" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+    <Label text="Recent Audit Events"/>
+    <TableView fx:id="auditTable" prefHeight="240">
+        <columns>
+            <TableColumn fx:id="auditTimeCol" text="Time" prefWidth="180"/>
+            <TableColumn fx:id="auditTypeCol" text="Event" prefWidth="160"/>
+            <TableColumn fx:id="auditActorCol" text="Actor" prefWidth="120"/>
+            <TableColumn fx:id="auditDetailsCol" text="Details" prefWidth="420"/>
+        </columns>
+    </TableView>
+
+    <Label text="Recent Sync Queue Records"/>
+    <TableView fx:id="queueTable" prefHeight="220">
+        <columns>
+            <TableColumn fx:id="queueStatusCol" text="Status" prefWidth="100"/>
+            <TableColumn fx:id="queueAttemptsCol" text="Attempts" prefWidth="90"/>
+            <TableColumn fx:id="queueNextCol" text="Next Attempt" prefWidth="180"/>
+            <TableColumn fx:id="queueErrorCol" text="Last Error" prefWidth="510"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Button text="Refresh" onAction="#refresh"/>
+        <Label fx:id="statusLabel" text="Ready"/>
+    </HBox>
+</VBox>
